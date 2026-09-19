@@ -2,38 +2,30 @@
 
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-import { parseCommandLine, printHelp, resolveOptions, validateOptions } from './lib/options.mjs'
-import { createReporter } from './lib/reporter.mjs'
-import { ensureDestinationIsEmpty, scaffoldProject } from './lib/scaffold.mjs'
+import { createProjectApplication } from './composition/createProjectApplication.mjs'
+import { parseCommandLine, printHelp, resolveProjectRequest } from './ui/command.mjs'
+import { createReporter } from './ui/reporter.mjs'
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-	await run(process.argv.slice(2))
-}
+if (process.argv[1] === fileURLToPath(import.meta.url)) await run(process.argv.slice(2))
 
-export async function run(argv, environment = process) {
-	const command = parseCommandLine(argv)
-
-	if (command.values.help) {
-		printHelp(environment.stdout)
-		return
-	}
-	if (command.values.version) {
-		environment.stdout.write(`${process.env.npm_package_version ?? '0.2.0'}\n`)
-		return
-	}
-
+export async function run(argv, environment = process, application = createProjectApplication()) {
 	const reporter = createReporter(environment.stdout, environment.env)
 	try {
-		const options = await resolveOptions(command, environment)
-		validateOptions(options)
-		await ensureDestinationIsEmpty(options.destination)
+		const command = parseCommandLine(argv)
+		if (command.values.help) return printHelp(environment.stdout)
+		if (command.values.version) return environment.stdout.write(`${process.env.npm_package_version ?? '0.3.0'}\n`)
 
-		if (options.dryRun) {
-			reporter.plan(options)
-			return
+		const request = await resolveProjectRequest(command, environment)
+		if (request.dryRun) return reporter.plan(request.specification)
+
+		reporter.start()
+		const unsubscribe = reporter.subscribe(application.events)
+		try {
+			await application.initializer.execute(request.specification)
 		}
-
-		await scaffoldProject(options, reporter)
+		finally {
+			unsubscribe()
+		}
 	}
 	catch (error) {
 		reporter.error(error instanceof Error ? error.message : String(error))

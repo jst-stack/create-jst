@@ -1,6 +1,6 @@
 import { basename, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
-import { COLOR_SCHEMES, DEFAULTS, PACKAGE_MANAGERS, PRIMARY_COLORS, TEMPLATE_SOURCE } from './constants.mjs'
+import { buildProjectSpecification, normalizePackageName, PACKAGE_MANAGERS, toTitle } from '../domain/projectSpecification.mjs'
 
 export function parseCommandLine(args) {
 	return parseArgs({
@@ -30,57 +30,46 @@ export function parseCommandLine(args) {
 	})
 }
 
-export async function resolveOptions(command, environment) {
+export async function resolveProjectRequest(command, environment) {
 	const { positionals, values } = command
 	if (positionals.length > 1) throw new Error('Only one project directory can be provided.')
 	if (values.git && values['no-git']) throw new Error('Use either --git or --no-git, not both.')
 	if (values['no-install'] && values['skip-install']) throw new Error('Use either --no-install or --skip-install, not both.')
 
-	const interactive = Boolean(environment.stdin.isTTY) && !values.yes && !values['no-interactive']
-	const prompt = interactive ? await createPrompt(environment) : undefined
-
+	const prompt = await createPrompt(environment, values)
 	try {
 		const directory = positionals[0] ?? await prompt?.text('Project directory', 'my-jst-app') ?? 'my-jst-app'
 		const name = values.name ?? normalizePackageName(basename(resolve(environment.cwd(), directory)))
 		const title = values.title ?? toTitle(name)
 		const detectedPackageManager = detectPackageManager(environment.env)
 		const requestedPackageManager = values['package-manager']
-			?? await prompt?.choice('Package manager', PACKAGE_MANAGERS.filter(value => value !== 'auto'), detectedPackageManager)
+			?? await prompt?.choice('Package manager', PACKAGE_MANAGERS, detectedPackageManager)
 			?? detectedPackageManager
 		const packageManager = requestedPackageManager === 'auto' ? detectedPackageManager : requestedPackageManager
-		const demo = values.demo ?? await prompt?.choice('Start from', ['remove', 'keep'], DEFAULTS.demo) ?? DEFAULTS.demo
-		const install = !(values['no-install'] || values['skip-install'])
 		const initGit = values.git ?? !values['no-git']
+		const install = !(values['no-install'] || values['skip-install'])
 
 		return {
-			colorScheme: values['color-scheme'] ?? DEFAULTS.colorScheme,
-			demo,
-			description: values.description ?? `${title} web application.`,
-			destination: resolve(environment.cwd(), directory),
 			dryRun: values['dry-run'] ?? false,
-			initGit: interactive ? await prompt.choice('Initialize a Git repository', ['yes', 'no'], initGit ? 'yes' : 'no') === 'yes' : initGit,
-			install: interactive ? await prompt.choice('Install dependencies', ['yes', 'no'], install ? 'yes' : 'no') === 'yes' : install,
-			language: values.lang ?? DEFAULTS.language,
-			name,
-			packageManager,
-			primaryColor: values['primary-color'] ?? DEFAULTS.primaryColor,
-			template: values.template ?? TEMPLATE_SOURCE,
-			title,
+			specification: buildProjectSpecification({
+				colorScheme: values['color-scheme'],
+				demo: values.demo ?? await prompt?.choice('Start from', ['remove', 'keep'], 'remove') ?? 'remove',
+				description: values.description ?? `${title} web application.`,
+				destination: resolve(environment.cwd(), directory),
+				initGit: prompt ? await prompt.choice('Initialize a Git repository', ['yes', 'no'], initGit ? 'yes' : 'no') === 'yes' : initGit,
+				install: prompt ? await prompt.choice('Install dependencies', ['yes', 'no'], install ? 'yes' : 'no') === 'yes' : install,
+				language: values.lang,
+				name,
+				packageManager,
+				primaryColor: values['primary-color'],
+				template: values.template,
+				title,
+			}),
 		}
 	}
 	finally {
 		prompt?.close()
 	}
-}
-
-export function validateOptions(options) {
-	if (!/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/.test(options.name) || options.name.length > 214) {
-		throw new Error(`Invalid npm package name: ${options.name}`)
-	}
-	if (!COLOR_SCHEMES.includes(options.colorScheme)) throw new Error(`Colour scheme must be one of: ${COLOR_SCHEMES.join(', ')}.`)
-	if (!PRIMARY_COLORS.includes(options.primaryColor)) throw new Error(`Primary colour must be one of: ${PRIMARY_COLORS.join(', ')}.`)
-	if (!['keep', 'remove'].includes(options.demo)) throw new Error('Demo mode must be either keep or remove.')
-	if (!PACKAGE_MANAGERS.includes(options.packageManager)) throw new Error(`Package manager must be one of: ${PACKAGE_MANAGERS.join(', ')}.`)
 }
 
 export function detectPackageManager(environment = {}) {
@@ -89,14 +78,6 @@ export function detectPackageManager(environment = {}) {
 	if (userAgent.startsWith('yarn/')) return 'yarn'
 	if (userAgent.startsWith('bun/')) return 'bun'
 	return 'npm'
-}
-
-export function normalizePackageName(value) {
-	return value.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'jst-app'
-}
-
-export function toTitle(value) {
-	return value.replace(/^@[^/]+\//, '').split(/[-_.]+/).filter(Boolean).map(word => word[0].toUpperCase() + word.slice(1)).join(' ')
 }
 
 export function printHelp(output) {
@@ -124,15 +105,11 @@ Options:
   --template <owner/repo[#ref]>  use a compatible template source
   -v, --version                  show the CLI version
   -h, --help                     show this help
-
-Examples:
-  npm create jst@latest my-app
-  npm create jst@latest my-app -- --package-manager pnpm --demo keep
-  npm create jst@latest my-app -- --yes --no-install --no-git
 `)
 }
 
-async function createPrompt(environment) {
+async function createPrompt(environment, values) {
+	if (!environment.stdin.isTTY || values.yes || values['no-interactive']) return undefined
 	const { createInterface } = await import('node:readline/promises')
 	const reader = createInterface({ input: environment.stdin, output: environment.stdout })
 	return {

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { detectPackageManager, normalizePackageName, parseCommandLine, resolveOptions, toTitle } from '../src/lib/options.mjs'
+import { detectPackageManager, parseCommandLine, resolveProjectRequest } from '../src/ui/command.mjs'
+import { normalizePackageName, toTitle } from '../src/domain/projectSpecification.mjs'
 
 test('parses a non-interactive project command', () => {
 	const result = parseCommandLine(['my-app', '--yes', '--package-manager', 'pnpm', '--no-install'])
@@ -24,9 +25,9 @@ test('detects the package manager that invoked the initializer', () => {
 })
 
 test('resolves the auto package manager choice from the invoking client', async () => {
-	const options = await resolveOptions(
+	const request = await resolveProjectRequest(
 		parseCommandLine(['my-app', '--yes', '--package-manager', 'auto']),
 		{ cwd: () => '/tmp', env: { npm_config_user_agent: 'pnpm/10.0.0 npm/? node/v24.0.0' }, stdin: { isTTY: false }, stdout: { write() {} } },
 	)
-	assert.equal(options.packageManager, 'pnpm')
+	assert.equal(request.specification.packageManager, 'pnpm')
 })

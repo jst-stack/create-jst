@@ -1,0 +1,30 @@
+{
+  "name": "create-jst",
+  "version": "0.1.0",
+  "description": "Create a web application from the JST template.",
+  "type": "module",
+  "bin": {
+    "create-jst": "./src/cli.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jst-stack/create-jst.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jst-stack/create-jst/issues"
+  },
+  "homepage": "https://github.com/jst-stack/jst#readme",
+  "license": "MIT",
+  "dependencies": {
+    "degit": "^3.10.0"
+  }
+}

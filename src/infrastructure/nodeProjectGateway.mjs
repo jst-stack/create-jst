@@ -62,21 +62,25 @@ export function createNodeProjectGateway({ nodeExecutable }) {
 	}
 
 	function installDependencies(destination, packageManager) {
-		return run(packageManager, installCommands[packageManager], destination, true)
+		return run(packageManager, installCommands[packageManager], destination)
 	}
 }
 
-function run(command, args, cwd, inheritOutput = false) {
+function run(command, args, cwd) {
 	return new Promise((resolve, reject) => {
-		const child = spawn(command, args, { cwd, stdio: inheritOutput ? 'inherit' : 'pipe' })
+		const child = spawn(command, args, { cwd, stdio: 'pipe' })
+		let stdout = ''
 		let stderr = ''
+		child.stdout?.on('data', chunk => {
+			stdout += chunk
+		})
 		child.stderr?.on('data', chunk => {
 			stderr += chunk
 		})
 		child.once('error', error => reject(new Error(`Could not run ${command}: ${error.message}`)))
 		child.once('close', code => {
 			if (code === 0) resolve()
-			else reject(new Error(`${command} ${args.join(' ')} failed.${stderr ? `\n${stderr.trim()}` : ''}`))
+			else reject(new Error(`${command} ${args.join(' ')} failed.${[stdout, stderr].filter(Boolean).join('\n').trim() ? `\n${[stdout, stderr].filter(Boolean).join('\n').trim()}` : ''}`))
 		})
 	})
 }

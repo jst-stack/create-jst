@@ -25,6 +25,7 @@
   "homepage": "https://github.com/jst-stack/jst#readme",
   "license": "MIT",
   "dependencies": {
+    "@clack/prompts": "^1.8.1",
     "degit": "^3.10.0"
   }
 }

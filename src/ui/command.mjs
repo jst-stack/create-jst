@@ -1,5 +1,6 @@
 import { basename, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
+import * as prompts from '@clack/prompts'
 import { buildProjectSpecification, normalizePackageName, PACKAGE_MANAGERS, toTitle } from '../domain/projectSpecification.mjs'
 
 export function parseCommandLine(args) {
@@ -51,13 +52,15 @@ export async function resolveProjectRequest(command, environment) {
 
 		return {
 			dryRun: values['dry-run'] ?? false,
+			interactive: Boolean(prompt),
+			terminal: Boolean(environment.stdin.isTTY),
 			specification: buildProjectSpecification({
 				colorScheme: values['color-scheme'],
 				demo: values.demo ?? await prompt?.choice('Start from', ['remove', 'keep'], 'remove') ?? 'remove',
 				description: values.description ?? `${title} web application.`,
 				destination: resolve(environment.cwd(), directory),
-				initGit: prompt ? await prompt.choice('Initialize a Git repository', ['yes', 'no'], initGit ? 'yes' : 'no') === 'yes' : initGit,
-				install: prompt ? await prompt.choice('Install dependencies', ['yes', 'no'], install ? 'yes' : 'no') === 'yes' : install,
+				initGit: prompt ? await prompt.confirm('Initialize a Git repository?', initGit) : initGit,
+				install: prompt ? await prompt.confirm('Install dependencies?', install) : install,
 				language: values.lang,
 				name,
 				packageManager,
@@ -110,21 +113,45 @@ Options:
 
 async function createPrompt(environment, values) {
 	if (!environment.stdin.isTTY || values.yes || values['no-interactive']) return undefined
-	const { createInterface } = await import('node:readline/promises')
-	const reader = createInterface({ input: environment.stdin, output: environment.stdout })
+	prompts.intro('create-jst')
 	return {
 		async choice(label, choices, fallback) {
-			const rendered = choices.map((choice, index) => `${index + 1}:${choice}`).join('  ')
-			const answer = (await reader.question(`  ${label} (${rendered}) [${fallback}]: `)).trim()
-			if (!answer) return fallback
-			const index = Number.parseInt(answer, 10)
-			return choices[index - 1] ?? answer
+			return resolvePrompt(await prompts.select({
+				initialValue: fallback,
+				message: label,
+				options: choices.map(value => ({ hint: choiceHint(value), label: choiceLabel(value), value })),
+			}))
 		},
 		close() {
-			reader.close()
+			return undefined
+		},
+		async confirm(label, initialValue) {
+			return resolvePrompt(await prompts.confirm({ initialValue, message: label }))
 		},
 		async text(label, fallback) {
-			return (await reader.question(`  ${label} [${fallback}]: `)).trim() || fallback
+			return resolvePrompt(await prompts.text({ initialValue: fallback, message: label }))
 		},
 	}
+}
+
+function choiceLabel(value) {
+	return {
+		keep: 'Keep the JST demo',
+		remove: 'Start with a clean application',
+	}[value] ?? value
+}
+
+function choiceHint(value) {
+	return {
+		npm: 'default',
+		remove: 'recommended',
+	}[value]
+}
+
+function resolvePrompt(value) {
+	if (!prompts.isCancel(value)) return value
+	prompts.cancel('Setup cancelled.')
+	const error = new Error('Setup cancelled.')
+	error.name = 'PromptCancelledError'
+	throw error
 }

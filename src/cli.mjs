@@ -17,9 +17,9 @@ export async function run(argv, environment = process, application = createProje
 		if (command.values.version) return environment.stdout.write(`${process.env.npm_package_version ?? '0.3.0'}\n`)
 
 		const request = await resolveProjectRequest(command, environment)
-		if (request.dryRun) return reporter.plan(request.specification)
+		if (request.dryRun) return reporter.plan(request.specification, request)
 
-		reporter.start()
+		reporter.start(request)
 		const unsubscribe = reporter.subscribe(application.events)
 		try {
 			await application.initializer.execute(request.specification)
@@ -29,6 +29,7 @@ export async function run(argv, environment = process, application = createProje
 		}
 	}
 	catch (error) {
+		if (error instanceof Error && error.name === 'PromptCancelledError') return
 		reporter.error(error instanceof Error ? error.message : String(error))
 		environment.exitCode = 1
 	}

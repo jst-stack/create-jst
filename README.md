@@ -15,5 +15,3 @@ npm create jst@latest my-app -- --dry-run
 ```
 
 Use `--help` to view non-interactive options. The initializer never overwrites a non-empty directory.
-
-See [Architecture](./ARCHITECTURE.md) for the dependency boundaries and replaceable gateways.

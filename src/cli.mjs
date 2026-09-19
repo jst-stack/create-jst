@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
 import process from 'node:process'
+import { realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { createProjectApplication } from './composition/createProjectApplication.mjs'
 import { parseCommandLine, printHelp, resolveProjectRequest } from './ui/command.mjs'
 import { createReporter } from './ui/reporter.mjs'
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) await run(process.argv.slice(2))
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) await run(process.argv.slice(2))
 
 export async function run(argv, environment = process, application = createProjectApplication()) {
 	const reporter = createReporter(environment.stdout, environment.env)

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
-import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
@@ -38,6 +38,19 @@ test('dry runs without creating the destination', async () => {
 		const { stdout } = await exec(process.execPath, [cli.pathname, project, '--yes', '--dry-run', '--package-manager', 'pnpm'])
 		assert.match(stdout, /plan only/)
 		await assert.rejects(readFile(join(project, 'package.json')), { code: 'ENOENT' })
+	}
+	finally {
+		await rm(root, { force: true, recursive: true })
+	}
+})
+
+test('runs when npm exposes the CLI through a symbolic link', async () => {
+	const root = await mkdtemp(join(tmpdir(), 'create-jst-bin-'))
+	const binary = join(root, 'create-jst')
+	try {
+		await symlink(cli.pathname, binary)
+		const { stdout } = await exec(process.execPath, [binary, '--help'])
+		assert.match(stdout, /npm create jst@latest/)
 	}
 	finally {
 		await rm(root, { force: true, recursive: true })

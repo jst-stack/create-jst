@@ -4,7 +4,7 @@
   "description": "Create a web application from the JST template.",
   "type": "module",
   "bin": {
-    "create-jst": "./src/cli.mjs"
+    "create-jst": "src/cli.mjs"
   },
   "files": [
     "src"

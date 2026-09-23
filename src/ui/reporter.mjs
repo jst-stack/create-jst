@@ -32,7 +32,6 @@ export function createReporter(output, environment = {}) {
 				prompts.note([
 					`Template: ${specification.template}`,
 					`Package manager: ${specification.packageManager}`,
-					`Starter demo: ${specification.demo}`,
 					`Install dependencies: ${specification.install ? 'yes' : 'no'}`,
 					`Initialize Git: ${specification.initGit ? 'yes' : 'no'}`,
 				].join('\n'), specification.destination)
@@ -43,7 +42,6 @@ export function createReporter(output, environment = {}) {
 			output.write(`  destination     ${specification.destination}\n`)
 			output.write(`  template        ${specification.template}\n`)
 			output.write(`  package manager ${specification.packageManager}\n`)
-			output.write(`  starter demo    ${specification.demo}\n`)
 			output.write(`  install         ${specification.install ? 'yes' : 'no'}\n`)
 			output.write(`  git             ${specification.initGit ? 'yes' : 'no'}\n\n`)
 		},

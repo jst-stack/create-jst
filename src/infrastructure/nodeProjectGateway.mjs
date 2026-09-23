@@ -38,7 +38,6 @@ export function createNodeProjectGateway({ nodeExecutable }) {
 			'--lang', specification.language,
 			'--color-scheme', specification.colorScheme,
 			'--primary-color', specification.primaryColor,
-			'--demo', specification.demo,
 		], specification.destination)
 	}
 

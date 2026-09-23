@@ -9,7 +9,6 @@ export function parseCommandLine(args) {
 		args,
 		options: {
 			'color-scheme': { type: 'string' },
-			'demo': { type: 'string' },
 			'description': { type: 'string' },
 			'dry-run': { type: 'boolean' },
 			'git': { type: 'boolean' },
@@ -56,7 +55,6 @@ export async function resolveProjectRequest(command, environment) {
 			terminal: Boolean(environment.stdin.isTTY),
 			specification: buildProjectSpecification({
 				colorScheme: values['color-scheme'],
-				demo: values.demo ?? await prompt?.choice('Start from', ['remove', 'keep'], 'remove') ?? 'remove',
 				description: values.description ?? `${title} web application.`,
 				destination: resolve(environment.cwd(), directory),
 				initGit: prompt ? await prompt.confirm('Initialize a Git repository?', initGit) : initGit,
@@ -93,7 +91,6 @@ The interactive wizard only asks about decisions that affect the generated proje
 Application title and description are derived from the directory; pass flags only when automation needs overrides.
 
 Options:
-  --demo <keep|remove>           retain or remove the starter demo
   --package-manager <manager>    auto, npm, pnpm, yarn, or bun
   --no-install                   create the project without installing dependencies
   --git, --no-git                initialize a Git repository (default: enabled)
@@ -119,7 +116,7 @@ async function createPrompt(environment, values) {
 			return resolvePrompt(await prompts.select({
 				initialValue: fallback,
 				message: label,
-				options: choices.map(value => ({ hint: choiceHint(value), label: choiceLabel(value), value })),
+				options: choices.map(value => ({ hint: choiceHint(value), label: value, value })),
 			}))
 		},
 		close() {
@@ -134,17 +131,9 @@ async function createPrompt(environment, values) {
 	}
 }
 
-function choiceLabel(value) {
-	return {
-		keep: 'Keep the JST demo',
-		remove: 'Start with a clean application',
-	}[value] ?? value
-}
-
 function choiceHint(value) {
 	return {
 		npm: 'default',
-		remove: 'recommended',
 	}[value]
 }
 

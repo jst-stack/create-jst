@@ -6,7 +6,6 @@ export const TEMPLATE_SOURCE = 'jst-stack/jst'
 export function buildProjectSpecification(input) {
 	const specification = Object.freeze({
 		colorScheme: input.colorScheme ?? 'dark',
-		demo: input.demo ?? 'remove',
 		description: input.description ?? `${input.title} web application.`,
 		destination: input.destination,
 		initGit: input.initGit ?? true,
@@ -30,7 +29,6 @@ export function validateProjectSpecification(specification) {
 	if (!specification.title?.trim()) throw new Error('Application title is required.')
 	if (!COLOR_SCHEMES.includes(specification.colorScheme)) throw new Error(`Colour scheme must be one of: ${COLOR_SCHEMES.join(', ')}.`)
 	if (!PRIMARY_COLORS.includes(specification.primaryColor)) throw new Error(`Primary colour must be one of: ${PRIMARY_COLORS.join(', ')}.`)
-	if (!['keep', 'remove'].includes(specification.demo)) throw new Error('Demo mode must be either keep or remove.')
 	if (!PACKAGE_MANAGERS.includes(specification.packageManager)) throw new Error(`Package manager must be one of: ${PACKAGE_MANAGERS.join(', ')}.`)
 }
 

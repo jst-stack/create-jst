@@ -4,19 +4,19 @@ import { chmod, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import process from 'node:process'
-import { URL } from 'node:url'
+import { fileURLToPath, URL } from 'node:url'
 import test from 'node:test'
 import { promisify } from 'node:util'
 
 const exec = promisify(execFile)
-const cli = new URL('../src/cli.mjs', import.meta.url)
+const cliPath = fileURLToPath(new URL('../src/cli.mjs', import.meta.url))
 
 test('creates a clean, configured project and protects non-empty destinations', async () => {
 	const root = await mkdtemp(join(tmpdir(), 'create-jst-'))
 	const project = join(root, 'project')
 	try {
 		const template = await createTemplate(root)
-		await exec(process.execPath, [cli.pathname, project, '--yes', '--no-install', '--no-git', '--template', template])
+		await exec(process.execPath, [cliPath, project, '--yes', '--no-install', '--no-git', '--template', template])
 		const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'))
 		assert.equal(manifest.name, 'project')
 		assert.equal(manifest.packageManager, 'npm@11.6.2')
@@ -25,7 +25,7 @@ test('creates a clean, configured project and protects non-empty destinations', 
 		const blocked = join(root, 'blocked')
 		await writeFile(blocked, 'not a directory')
 		await assert.rejects(
-			exec(process.execPath, [cli.pathname, blocked, '--yes']),
+			exec(process.execPath, [cliPath, blocked, '--yes']),
 			error => error.stdout.includes('Destination is not a directory'),
 		)
 	}
@@ -39,7 +39,7 @@ test('dry runs without creating the destination', async () => {
 	const project = join(root, 'project')
 	try {
 		const template = await createTemplate(root)
-		const { stdout } = await exec(process.execPath, [cli.pathname, project, '--yes', '--dry-run', '--package-manager', 'pnpm', '--template', template])
+		const { stdout } = await exec(process.execPath, [cliPath, project, '--yes', '--dry-run', '--package-manager', 'pnpm', '--template', template])
 		assert.match(stdout, /plan only/)
 		await assert.rejects(readFile(join(project, 'package.json')), { code: 'ENOENT' })
 	}
@@ -52,7 +52,7 @@ test('runs when npm exposes the CLI through a symbolic link', async () => {
 	const root = await mkdtemp(join(tmpdir(), 'create-jst-bin-'))
 	const binary = join(root, 'create-jst')
 	try {
-		await symlink(cli.pathname, binary)
+		await symlink(cliPath, binary)
 		const { stdout } = await exec(process.execPath, [binary, '--help'])
 		assert.match(stdout, /npm create jst@latest/)
 	}
@@ -71,7 +71,7 @@ printf '%s' "$PWD" > "${join(root, 'pnpm-cwd')}"
 echo 9.15.0
 `)
 		await chmod(join(root, 'pnpm'), 0o755)
-		await exec(process.execPath, [cli.pathname, project, '--yes', '--no-install', '--no-git', '--package-manager', 'pnpm', '--template', template], {
+		await exec(process.execPath, [cliPath, project, '--yes', '--no-install', '--no-git', '--package-manager', 'pnpm', '--template', template], {
 			env: { ...process.env, PATH: `${root}:${process.env.PATH}` },
 })
 
@@ -84,7 +84,7 @@ test('creates the showcase example without requiring template setup', async () =
 		await writeFile(join(template, 'package.json'), '{"name":"jst-showcase","scripts":{"check":"echo ok"}}\n')
 		await writeFile(join(template, 'README.md'), 'npm ci\nnpm run check\n')
 
-		await exec(process.execPath, [cli.pathname, project, '--yes', '--example', 'showcase', '--no-install', '--no-git', '--template', template])
+		await exec(process.execPath, [cliPath, project, '--yes', '--example', 'showcase', '--no-install', '--no-git', '--template', template])
 
 		const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'))
 		assert.equal(manifest.name, 'project')

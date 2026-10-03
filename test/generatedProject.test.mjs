@@ -4,12 +4,12 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
-import { URL } from 'node:url'
+import { fileURLToPath, URL } from 'node:url'
 import test from 'node:test'
 import { promisify } from 'node:util'
 
 const execute = promisify(execFile)
-const cli = new URL('../src/cli.mjs', import.meta.url)
+const cliPath = fileURLToPath(new URL('../src/cli.mjs', import.meta.url))
 
 test('generated project installs and passes its complete quality gate', async (context) => {
 	const packageManager = process.env.JST_TEST_PACKAGE_MANAGER
@@ -23,7 +23,7 @@ test('generated project installs and passes its complete quality gate', async (c
 
 	try {
 		await execute(process.execPath, [
-			cli.pathname,
+			cliPath,
 			projectRoot,
 			'--yes',
 			'--no-git',

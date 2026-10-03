@@ -117,7 +117,7 @@ async function configurePackageManager(destination, packageManager, signal) {
 	if (packageManager === 'pnpm') {
 		await writeFile(
 			join(destination, 'pnpm-workspace.yaml'),
-			'minimumReleaseAge: 10080\nminimumReleaseAgeExcludePrune: true\ntrustPolicy: no-downgrade\ntrustPolicyIgnoreAfter: 10080\nshellEmulator: true\n',
+			'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - "@jst-stack/eslint-plugin"\nminimumReleaseAgeExcludePrune: true\ntrustPolicy: no-downgrade\ntrustPolicyIgnoreAfter: 10080\nshellEmulator: true\n',
 		)
 		await replaceReadmeCommands(destination, 'pnpm')
 	}

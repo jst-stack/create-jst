@@ -4,6 +4,11 @@ Notable changes to `create-jst` are documented here.
 
 ## Unreleased
 
+## 0.4.1
+
+- Keep the seven-day pnpm release-age defense while explicitly trusting the ecosystem's own architecture-policy package.
+- Make package-manager integration tests portable across POSIX and Windows runners.
+
 ## 0.4.0
 
 - Establish the Node 24 runtime, npm/pnpm generated-project canary, cross-platform CI, and provenance-backed npm release workflow.

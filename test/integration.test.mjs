@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { chmod, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { basename, join } from 'node:path'
+import { basename, delimiter, join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, URL } from 'node:url'
 import test from 'node:test'
@@ -66,14 +66,23 @@ test('configures a selected package manager without installing dependencies', as
 	const project = join(root, 'project')
 	try {
 		const template = await createTemplate(root)
-		await writeFile(join(root, 'pnpm'), `#!/bin/sh
-printf '%s' "$PWD" > "${join(root, 'pnpm-cwd')}"
-echo 9.15.0
-`)
-		await chmod(join(root, 'pnpm'), 0o755)
+		await createPackageManagerStub(root)
 		await exec(process.execPath, [cliPath, project, '--yes', '--no-install', '--no-git', '--package-manager', 'pnpm', '--template', template], {
-			env: { ...process.env, PATH: `${root}:${process.env.PATH}` },
-})
+			env: { ...process.env, PATH: `${root}${delimiter}${process.env.PATH}` },
+		})
+		const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'))
+		assert.equal(manifest.packageManager, 'pnpm@9.15.0')
+		assert.match(basename(await readFile(join(root, 'pnpm-cwd'), 'utf8')), /^\.project-\d+-\d+\.tmp$/)
+		assert.equal(
+			await readFile(join(project, 'pnpm-workspace.yaml'), 'utf8'),
+			'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - "@jst-stack/eslint-plugin"\nminimumReleaseAgeExcludePrune: true\ntrustPolicy: no-downgrade\ntrustPolicyIgnoreAfter: 10080\nshellEmulator: true\n',
+		)
+		await assert.rejects(readFile(join(project, 'package-lock.json')), { code: 'ENOENT' })
+	}
+	finally {
+		await rm(root, { force: true, recursive: true })
+	}
+}, { timeout: 60_000 })
 
 test('creates the showcase example without requiring template setup', async () => {
 	const root = await mkdtemp(join(tmpdir(), 'create-jst-showcase-'))
@@ -94,19 +103,19 @@ test('creates the showcase example without requiring template setup', async () =
 		await rm(root, { force: true, recursive: true })
 	}
 })
-		const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'))
-		assert.equal(manifest.packageManager, 'pnpm@9.15.0')
-		assert.match(basename(await readFile(join(root, 'pnpm-cwd'), 'utf8')), /^\.project-\d+-\d+\.tmp$/)
-		assert.equal(
-			await readFile(join(project, 'pnpm-workspace.yaml'), 'utf8'),
-			'minimumReleaseAge: 10080\nminimumReleaseAgeExcludePrune: true\ntrustPolicy: no-downgrade\ntrustPolicyIgnoreAfter: 10080\nshellEmulator: true\n',
-		)
-		await assert.rejects(readFile(join(project, 'package-lock.json')), { code: 'ENOENT' })
+
+async function createPackageManagerStub(root) {
+	const cwdOutput = join(root, 'pnpm-cwd')
+	if (process.platform === 'win32') {
+		const stubPath = join(root, 'pnpm-stub.mjs')
+		await writeFile(stubPath, `import { writeFileSync } from 'node:fs'\nwriteFileSync(${JSON.stringify(cwdOutput)}, process.cwd())\nconsole.log('9.15.0')\n`)
+		await writeFile(join(root, 'pnpm.cmd'), `@echo off\r\n"${process.execPath}" "${stubPath}"\r\n`)
+		return
 	}
-	finally {
-		await rm(root, { force: true, recursive: true })
-	}
-}, { timeout: 60_000 })
+	const executable = join(root, 'pnpm')
+	await writeFile(executable, `#!/bin/sh\nprintf '%s' "$PWD" > "${cwdOutput}"\necho 9.15.0\n`)
+	await chmod(executable, 0o755)
+}
 
 async function createTemplate(root) {
 	const template = join(root, 'template')

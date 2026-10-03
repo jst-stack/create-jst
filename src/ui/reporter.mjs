@@ -28,7 +28,9 @@ export function createReporter(output, environment = {}) {
 		plan(specification, request) {
 			usesClack = request.terminal
 			if (usesClack) {
-				if (!request.interactive) prompts.intro('create-jst')
+				if (!request.interactive) {
+					prompts.intro('create-jst')
+				}
 				prompts.note([
 					`Template: ${specification.template}`,
 					`Package manager: ${specification.packageManager}`,
@@ -48,16 +50,21 @@ export function createReporter(output, environment = {}) {
 		start(request) {
 			usesClack = request.terminal
 			if (usesClack) {
-				if (!request.interactive) prompts.intro('create-jst')
+				if (!request.interactive) {
+					prompts.intro('create-jst')
+				}
 				return
 			}
 			output.write(`\n${paint('38;5;203', 'JST')} ${dim('A foundation for replaceable layers')}\n\n`)
 		},
-		subscribe(events) {
-			return events.subscribe(event => {
-				if (event.type === 'project.initialized') return this.success(event.specification)
+		progress(event) {
+				if (event.type === 'project.initialized') {
+					return this.success(event.specification)
+				}
 				const message = progressMessages[event.type]
-				if (!message) return
+				if (!message) {
+					return
+				}
 				if (usesClack) {
 					activeSpinner?.stop()
 					activeSpinner = prompts.spinner()
@@ -65,7 +72,6 @@ export function createReporter(output, environment = {}) {
 					return
 				}
 				output.write(`${dim('  ◌')} ${message(event.specification)}\n`)
-			})
 		},
 		success(specification) {
 			if (usesClack) {

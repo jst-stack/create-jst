@@ -1,15 +1,13 @@
 import process from 'node:process'
-import { createEventBus } from '../application/eventBus.mjs'
 import { createProjectInitializer } from '../application/projectInitializer.mjs'
 import { createDegitTemplateGateway } from '../infrastructure/degitTemplateGateway.mjs'
 import { createNodeProjectGateway } from '../infrastructure/nodeProjectGateway.mjs'
 
-export function createProjectApplication({ nodeExecutable = process.execPath } = {}) {
-	const events = createEventBus()
+export function createProjectApplication({ nodeExecutable = process.execPath, onProgress, signal } = {}) {
 	const initializer = createProjectInitializer({
-		events,
-		projectGateway: createNodeProjectGateway({ nodeExecutable }),
+		onProgress,
+		projectGateway: createNodeProjectGateway({ nodeExecutable, signal }),
 		templateGateway: createDegitTemplateGateway(),
 	})
-	return { events, initializer }
+	return { initializer }
 }

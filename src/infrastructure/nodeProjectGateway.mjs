@@ -1,7 +1,7 @@
 import { spawn, execFile } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { lstat, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises'
-import { basename, dirname, join } from 'node:path'
+import { basename, dirname, extname, join } from 'node:path'
 import process from 'node:process'
 import { promisify } from 'node:util'
 
@@ -10,6 +10,8 @@ const installCommands = {
 	npm: ['install', '--no-audit', '--no-fund'],
 	pnpm: ['install'],
 }
+const pnpmAction = 'pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0'
+const textExtensions = new Set(['.md', '.mjs', '.yaml', '.yml'])
 
 export function createNodeProjectGateway({ nodeExecutable, signal }) {
 	return {
@@ -112,6 +114,9 @@ async function configurePackageManager(destination, packageManager, signal) {
 	catch {
 		throw new Error(`Could not run ${packageManager}. Install it or choose another package manager.`)
 	}
+	if (packageManager === 'pnpm') {
+		manifest.scripts = replaceManifestCommands(manifest.scripts)
+	}
 	const packageManagerEntry = ['packageManager', `${packageManager}@${version.trim()}`]
 	const entries = Object.entries(manifest).flatMap(entry => entry[0] === 'engines' ? [packageManagerEntry, entry] : [entry])
 	if (!manifest.engines) {
@@ -121,10 +126,7 @@ async function configurePackageManager(destination, packageManager, signal) {
 	if (packageManager === 'pnpm') {
 		await writeFile(
 			join(destination, 'pnpm-workspace.yaml'),
-			`packages:
-  - '.'
-
-minimumReleaseAge: 10080
+			`minimumReleaseAge: 10080
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
   - '@jst-stack/eslint-plugin'
@@ -132,23 +134,56 @@ minimumReleaseAgeExclude:
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 10080
 shellEmulator: true
+
+packages:
+  - .
 `,
 		)
-		await replaceReadmeCommands(destination, 'pnpm')
+		await replaceProjectCommands(destination)
 	}
 }
 
-async function replaceReadmeCommands(destination, packageManager) {
-	const path = join(destination, 'README.md')
-	try {
-		const readme = await readFile(path, 'utf8')
-		await writeFile(path, readme.replaceAll('npm run ', `${packageManager} run `).replaceAll('npm ci', `${packageManager} install --frozen-lockfile`))
-	}
-	catch (error) {
-		if (error?.code !== 'ENOENT') {
-			throw error
+function replaceManifestCommands(scripts = {}) {
+	return Object.fromEntries(Object.entries(scripts).map(([name, command]) => [name, replacePnpmCommands(command)]))
+}
+
+async function replaceProjectCommands(directory) {
+	for (const entry of await readdir(directory, { withFileTypes: true })) {
+		const path = join(directory, entry.name)
+		if (entry.isDirectory()) {
+			await replaceProjectCommands(path)
+		}
+		else if (textExtensions.has(extname(entry.name)) || entry.name === 'Dockerfile') {
+			const source = await readFile(path, 'utf8')
+			const converted = entry.name === 'Dockerfile' ? replacePnpmDockerfile(source) : replacePnpmText(source)
+			if (converted !== source) {
+				await writeFile(path, converted)
+			}
 		}
 	}
+}
+
+function replacePnpmText(source) {
+	let result = replacePnpmCommands(source)
+	result = result.replaceAll('cache: npm', 'cache: pnpm')
+	result = result.replace(/^([ \t]*)- uses: actions\/setup-node@/mu, `$1- uses: ${pnpmAction}\n$&`)
+	return result.replace(/^\s*- run: npm install -g npm@[^\n]+\n/mu, '')
+}
+
+function replacePnpmCommands(source) {
+	return source
+		.replaceAll('npm ci', 'pnpm install --frozen-lockfile')
+		.replaceAll('npm run ', 'pnpm run ')
+		.replaceAll('npx ', 'pnpm exec ')
+}
+
+function replacePnpmDockerfile(source) {
+	return replacePnpmCommands(source)
+		.replaceAll(/^(FROM [^\n]+)$/gmu, '$1\nRUN corepack enable')
+		.replaceAll('COPY package.json package-lock.json ./', 'COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./')
+		.replaceAll('pnpm install --frozen-lockfile --omit=dev', 'pnpm install --prod --frozen-lockfile')
+		.replaceAll('npm cache clean --force', 'pnpm store prune')
+		.replaceAll('CMD ["npm", "start"]', 'CMD ["pnpm", "start"]')
 }
 
 async function prepareDestination(destination) {

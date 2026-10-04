@@ -72,13 +72,11 @@ test('configures a selected package manager without installing dependencies', as
 		})
 		const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'))
 		assert.equal(manifest.packageManager, 'pnpm@9.15.0')
+		assert.equal(manifest.scripts.check, 'pnpm run lint')
 		assert.match(basename(await readFile(join(root, 'pnpm-cwd'), 'utf8')), /^\.project-\d+-\d+\.tmp$/)
 		assert.equal(
 			await readFile(join(project, 'pnpm-workspace.yaml'), 'utf8'),
-			`packages:
-  - '.'
-
-minimumReleaseAge: 10080
+			`minimumReleaseAge: 10080
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
   - '@jst-stack/eslint-plugin'
@@ -86,8 +84,21 @@ minimumReleaseAgeExclude:
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 10080
 shellEmulator: true
+
+packages:
+  - .
 `,
 		)
+		assert.match(await readFile(join(project, 'README.md'), 'utf8'), /pnpm run check/u)
+		const workflow = await readFile(join(project, '.github/workflows/ci.yml'), 'utf8')
+		assert.match(workflow, /pnpm\/action-setup@ea17c68/u)
+		assert.match(workflow, /cache: pnpm/u)
+		assert.match(workflow, /pnpm install --frozen-lockfile/u)
+		assert.doesNotMatch(workflow, /npm install -g/u)
+		const dockerfile = await readFile(join(project, 'Dockerfile'), 'utf8')
+		assert.match(dockerfile, /RUN corepack enable/u)
+		assert.match(dockerfile, /COPY package\.json pnpm-lock\.yaml pnpm-workspace\.yaml/u)
+		assert.match(dockerfile, /CMD \["pnpm", "start"\]/u)
 		await assert.rejects(readFile(join(project, 'package-lock.json')), { code: 'ENOENT' })
 	}
 	finally {
@@ -131,13 +142,30 @@ async function createPackageManagerStub(root) {
 async function createTemplate(root) {
 	const template = join(root, 'template')
 	await mkdir(join(template, 'scripts'), { recursive: true })
+	await mkdir(join(template, '.github/workflows'), { recursive: true })
 	await writeFile(join(template, 'package.json'), `${JSON.stringify({
 		engines: { node: '>=24.15.0 <25' },
 		name: 'jst-template',
 		packageManager: 'npm@11.6.2',
-		scripts: { 'template:setup': 'node scripts/setup-template.mjs' },
+		scripts: { 'check': 'npm run lint', 'lint': 'echo ok', 'template:setup': 'node scripts/setup-template.mjs' },
 	}, null, '\t')}\n`)
 	await writeFile(join(template, 'package-lock.json'), '{}\n')
+	await writeFile(join(template, 'README.md'), 'npm ci\nnpm run check\n')
+	await writeFile(join(template, '.github/workflows/ci.yml'), `steps:
+  - uses: actions/setup-node@setup-node-sha
+    with:
+      cache: npm
+  - run: npm install -g npm@11.6.2
+  - run: npm ci
+  - run: npm run check
+  - run: npx playwright install
+`)
+	await writeFile(join(template, 'Dockerfile'), `FROM node:24 AS build
+COPY package.json package-lock.json ./
+RUN npm ci
+RUN npm run build
+CMD ["npm", "start"]
+`)
 	await writeFile(join(template, 'jst.template.json'), '{"schemaVersion":1,"templateVersion":"test","options":{"colorSchemes":["light","dark","auto"],"primaryColors":["lime"],"styles":["css","scss"]}}\n')
 	await writeFile(join(template, 'scripts/setup-template.mjs'), `
 import { readFile, rm, writeFile } from 'node:fs/promises'

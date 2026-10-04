@@ -121,7 +121,10 @@ async function configurePackageManager(destination, packageManager, signal) {
 	if (packageManager === 'pnpm') {
 		await writeFile(
 			join(destination, 'pnpm-workspace.yaml'),
-			`minimumReleaseAge: 10080
+			`packages:
+  - '.'
+
+minimumReleaseAge: 10080
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
   - '@jst-stack/eslint-plugin'

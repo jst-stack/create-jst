@@ -75,7 +75,10 @@ test('configures a selected package manager without installing dependencies', as
 		assert.match(basename(await readFile(join(root, 'pnpm-cwd'), 'utf8')), /^\.project-\d+-\d+\.tmp$/)
 		assert.equal(
 			await readFile(join(project, 'pnpm-workspace.yaml'), 'utf8'),
-			`minimumReleaseAge: 10080
+			`packages:
+  - '.'
+
+minimumReleaseAge: 10080
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
   - '@jst-stack/eslint-plugin'

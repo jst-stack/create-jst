@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process'
 import { readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import process from 'node:process'
 import { promisify } from 'node:util'
 
 const executeFile = promisify(execFile)
@@ -32,7 +33,10 @@ export function createNodeMigrationGateway() {
 		async verify(directory) {
 			const manifest = JSON.parse(await readFile(join(directory, 'package.json'), 'utf8'))
 			const packageManager = manifest.packageManager?.startsWith('pnpm@') ? 'pnpm' : 'npm'
-			return executeFile(packageManager, ['run', 'check'], { cwd: directory })
+			return executeFile(packageManager, ['run', 'check'], {
+				cwd: directory,
+				shell: process.platform === 'win32',
+			})
 		},
 		async writeTransaction(directory, files, verify) {
 			const originals = new Map()

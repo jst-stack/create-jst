@@ -60,7 +60,7 @@ export function createNodeProjectGateway({ nodeExecutable, signal }) {
 			'--color-scheme', specification.colorScheme,
 			'--primary-color', specification.primaryColor,
 			'--style', specification.style,
-		], specification.destination, signal)
+		], specification.destination, { signal })
 	}
 
 	async function configureExample(specification) {
@@ -71,11 +71,14 @@ export function createNodeProjectGateway({ nodeExecutable, signal }) {
 	}
 
 	function initializeGit(destination) {
-		return run('git', ['init', '--initial-branch=main'], destination, signal)
+		return run('git', ['init', '--initial-branch=main'], destination, { signal })
 	}
 
 	function installDependencies(destination, packageManager) {
-		return run(packageManager, installCommands[packageManager], destination, signal)
+		return run(packageManager, installCommands[packageManager], destination, {
+			shell: process.platform === 'win32',
+			signal,
+		})
 	}
 
 	async function validateTemplate(specification) {
@@ -192,9 +195,9 @@ async function prepareDestination(destination) {
 	return temporaryDestination
 }
 
-function run(command, args, cwd, signal) {
+function run(command, args, cwd, { shell = false, signal } = {}) {
 	return new Promise((resolve, reject) => {
-		const child = spawn(command, args, { cwd, signal, stdio: 'inherit' })
+		const child = spawn(command, args, { cwd, shell, signal, stdio: 'inherit' })
 		child.once('error', error => reject(new Error(`Could not run ${command}: ${error.message}`)))
 		child.once('close', code => {
 			if (code === 0) {

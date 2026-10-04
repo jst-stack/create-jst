@@ -35,12 +35,13 @@ jobs:
       - run: npm run check
 
   generated-project:
-    name: generated project / ${{ matrix.package-manager }}
-    runs-on: ubuntu-latest
+    name: generated project / ${{ matrix.os }} / ${{ matrix.package-manager }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
         package-manager: [npm, pnpm]
 
     steps:
@@ -58,4 +59,3 @@ jobs:
       - run: npm run test:generated
         env:
           JST_TEST_PACKAGE_MANAGER: ${{ matrix.package-manager }}
-

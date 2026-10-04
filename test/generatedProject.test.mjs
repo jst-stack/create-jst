@@ -32,7 +32,11 @@ test('generated project installs and passes its complete quality gate', async (c
 
 		const manifest = JSON.parse(await readFile(join(projectRoot, 'package.json'), 'utf8'))
 		assert.match(manifest.packageManager, new RegExp(`^${packageManager}@`, 'u'))
-		await execute(packageManager, ['run', 'check'], { cwd: projectRoot, timeout: 600_000 })
+		await execute(packageManager, ['run', 'check'], {
+			cwd: projectRoot,
+			shell: process.platform === 'win32',
+			timeout: 600_000,
+		})
 	}
 	finally {
 		await rm(temporaryRoot, { force: true, recursive: true })

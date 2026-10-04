@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, realpath, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
@@ -18,7 +18,7 @@ test('generated project installs and passes its complete quality gate', async (c
 		return
 	}
 
-	const temporaryRoot = await mkdtemp(join(tmpdir(), `create-jst-${packageManager}-`))
+	const temporaryRoot = await mkdtemp(join(await realpath(tmpdir()), `create-jst-${packageManager}-`))
 	const projectRoot = join(temporaryRoot, 'app')
 
 	try {

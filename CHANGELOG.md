@@ -4,6 +4,10 @@ Notable changes to `create-jst` are documented here.
 
 ## Unreleased
 
+## 0.4.4
+
+- Pin the production-container-verified `v0.4.3` template release.
+
 ## 0.4.3
 
 - Pin the npm 11/12-compatible `v0.4.2` template release.

@@ -75,7 +75,15 @@ test('configures a selected package manager without installing dependencies', as
 		assert.match(basename(await readFile(join(root, 'pnpm-cwd'), 'utf8')), /^\.project-\d+-\d+\.tmp$/)
 		assert.equal(
 			await readFile(join(project, 'pnpm-workspace.yaml'), 'utf8'),
-			'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - "@jst-stack/eslint-plugin"\nminimumReleaseAgeExcludePrune: true\ntrustPolicy: no-downgrade\ntrustPolicyIgnoreAfter: 10080\nshellEmulator: true\n',
+			`minimumReleaseAge: 10080
+minimumReleaseAgeExcludePrune: true
+minimumReleaseAgeExclude:
+  - '@jst-stack/eslint-plugin'
+
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 10080
+shellEmulator: true
+`,
 		)
 		await assert.rejects(readFile(join(project, 'package-lock.json')), { code: 'ENOENT' })
 	}

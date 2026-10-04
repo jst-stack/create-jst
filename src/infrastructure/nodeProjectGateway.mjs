@@ -103,7 +103,11 @@ async function configurePackageManager(destination, packageManager, signal) {
 
 	let version
 	try {
-		({ stdout: version } = await executeFile(packageManager, ['--version'], { cwd: destination, signal }))
+		({ stdout: version } = await executeFile(packageManager, ['--version'], {
+			cwd: destination,
+			shell: process.platform === 'win32',
+			signal,
+		}))
 	}
 	catch {
 		throw new Error(`Could not run ${packageManager}. Install it or choose another package manager.`)
@@ -117,7 +121,15 @@ async function configurePackageManager(destination, packageManager, signal) {
 	if (packageManager === 'pnpm') {
 		await writeFile(
 			join(destination, 'pnpm-workspace.yaml'),
-			'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  - "@jst-stack/eslint-plugin"\nminimumReleaseAgeExcludePrune: true\ntrustPolicy: no-downgrade\ntrustPolicyIgnoreAfter: 10080\nshellEmulator: true\n',
+			`minimumReleaseAge: 10080
+minimumReleaseAgeExcludePrune: true
+minimumReleaseAgeExclude:
+  - '@jst-stack/eslint-plugin'
+
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 10080
+shellEmulator: true
+`,
 		)
 		await replaceReadmeCommands(destination, 'pnpm')
 	}

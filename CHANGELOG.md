@@ -4,6 +4,10 @@ Notable changes to `create-jst` are documented here.
 
 ## Unreleased
 
+## 0.4.2
+
+- Execute Windows package-manager shims through the platform shell and emit a lint-clean pnpm workspace policy.
+
 ## 0.4.1
 
 - Keep the seven-day pnpm release-age defense while explicitly trusting the ecosystem's own architecture-policy package.

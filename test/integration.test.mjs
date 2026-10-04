@@ -23,6 +23,7 @@ test('creates a clean, configured project and protects non-empty destinations', 
 		assert.match(stdout, /npm install/u)
 		assert.match(stdout, /npm run create:slice -- feature firstFeature/u)
 		assert.match(stdout, /npm run validate/u)
+		assert.match(stdout, /npm run check:release/u)
 		await assert.rejects(readFile(join(project, 'scripts', 'setup-template.mjs')), { code: 'ENOENT' })
 
 		const blocked = join(root, 'blocked')

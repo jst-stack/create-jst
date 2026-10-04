@@ -16,6 +16,7 @@ const textExtensions = new Set(['.md', '.mjs', '.yaml', '.yml'])
 export function createNodeProjectGateway({ nodeExecutable, signal }) {
 	return {
 		assertDestinationIsEmpty,
+		assertRuntimeSupported,
 		cleanupDestination,
 		commitDestination,
 		configureExample,
@@ -24,6 +25,7 @@ export function createNodeProjectGateway({ nodeExecutable, signal }) {
 		initializeGit,
 		installDependencies,
 		prepareDestination,
+		removeGitMetadata,
 		validateTemplate,
 	}
 
@@ -64,13 +66,6 @@ export function createNodeProjectGateway({ nodeExecutable, signal }) {
 		], specification.destination, { signal })
 	}
 
-	async function configureExample(specification) {
-		const manifestPath = join(specification.destination, 'package.json')
-		const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
-		manifest.name = specification.name
-		await writeFile(manifestPath, `${JSON.stringify(manifest, null, '\t')}\n`)
-	}
-
 	function initializeGit(destination) {
 		return run('git', ['init', '--initial-branch=main'], destination, { signal })
 	}
@@ -99,6 +94,42 @@ export function createNodeProjectGateway({ nodeExecutable, signal }) {
 			}
 		}
 	}
+}
+
+async function configureExample(specification) {
+	const manifestPath = join(specification.destination, 'package.json')
+	const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
+	manifest.name = specification.name
+	await writeFile(manifestPath, `${JSON.stringify(manifest, null, '\t')}\n`)
+}
+
+function removeGitMetadata(destination) {
+	return rm(join(destination, '.git'), { force: true, recursive: true })
+}
+
+async function assertRuntimeSupported(destination) {
+	const manifest = JSON.parse(await readFile(join(destination, 'package.json'), 'utf8'))
+	const required = manifest.engines?.node
+	const match = /^>=(\d+)\.(\d+)\.(\d+) <(\d+)$/u.exec(required ?? '')
+	if (!match) {
+		return
+	}
+	const current = process.versions.node.split('.').map(Number)
+	const minimum = match.slice(1, 4).map(Number)
+	const maximumMajor = Number(match[4])
+	if (current[0] < maximumMajor && compareVersions(current, minimum) >= 0) {
+		return
+	}
+	throw new Error(`This template requires Node.js ${required}; detected ${process.versions.node}. Upgrade Node and run create-jst again.`)
+}
+
+function compareVersions(left, right) {
+	for (let index = 0; index < right.length; index += 1) {
+		if (left[index] !== right[index]) {
+			return left[index] - right[index]
+		}
+	}
+	return 0
 }
 
 async function configurePackageManager(destination, packageManager, signal) {

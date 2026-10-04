@@ -105,7 +105,7 @@ function getNextSteps(specification, directory) {
 		guidance: [
 			`First slice  ${packageManager} run create:slice -- feature firstFeature`,
 			`Fast gate    ${packageManager} run validate`,
-			`Full gate    ${packageManager} run check`,
+			`Release gate ${packageManager} run check:release`,
 		],
 		setup: [
 			`cd ${directory}`,

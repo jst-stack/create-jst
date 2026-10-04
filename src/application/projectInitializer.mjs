@@ -29,6 +29,12 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 					onProgress({ type: 'git.initialization.started', specification })
 					await projectGateway.initializeGit(temporaryDestination)
 				}
+				else {
+					await projectGateway.removeGitMetadata(temporaryDestination)
+				}
+				if (specification.install) {
+					await projectGateway.assertRuntimeSupported(temporaryDestination)
+				}
 				await projectGateway.commitDestination(temporaryDestination, specification.destination)
 				rollbackDestination = specification.destination
 				if (specification.install) {

@@ -16,10 +16,13 @@ test('creates a clean, configured project and protects non-empty destinations', 
 	const project = join(root, 'project')
 	try {
 		const template = await createTemplate(root)
-		await exec(process.execPath, [cliPath, project, '--yes', '--no-install', '--no-git', '--template', template])
+		const { stdout } = await exec(process.execPath, [cliPath, project, '--yes', '--no-install', '--no-git', '--template', template])
 		const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'))
 		assert.equal(manifest.name, 'project')
 		assert.equal(manifest.packageManager, 'npm@11.6.2')
+		assert.match(stdout, /npm install/u)
+		assert.match(stdout, /npm run create:slice -- feature firstFeature/u)
+		assert.match(stdout, /npm run validate/u)
 		await assert.rejects(readFile(join(project, 'scripts', 'setup-template.mjs')), { code: 'ENOENT' })
 
 		const blocked = join(root, 'blocked')
@@ -172,7 +175,7 @@ import { readFile, rm, writeFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
 
 const { values } = parseArgs({ options: {
-  name: { type: 'string' }, style: { type: 'string' }, yes: { type: 'boolean' },
+  name: { type: 'string' }, quiet: { type: 'boolean' }, style: { type: 'string' }, yes: { type: 'boolean' },
   title: { type: 'string' }, description: { type: 'string' }, lang: { type: 'string' },
   'color-scheme': { type: 'string' }, 'primary-color': { type: 'string' },
 } })

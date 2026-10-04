@@ -74,14 +74,43 @@ export function createReporter(output, environment = {}) {
 				output.write(`${dim('  ◌')} ${message(event.specification)}\n`)
 		},
 		success(specification) {
-			if (usesClack) {
-				activeSpinner?.stop('Project created')
-				prompts.outro(`Ready. Run \`${specification.packageManager} run dev\` in ${basename(specification.destination)}.`)
-				return
-			}
-			output.write(`\n${paint('38;5;114', 'Ready.')} ${specification.title} is in ${paint('38;5;203', basename(specification.destination))}.\n\n`)
-			output.write(`  ${dim('$')} cd ${basename(specification.destination)}\n`)
-			output.write(`  ${dim('$')} ${specification.packageManager} run dev\n\n`)
+			renderSuccess({ activeSpinner, dim, output, paint, specification, usesClack })
 		},
+	}
+}
+
+function renderSuccess({ activeSpinner, dim, output, paint, specification, usesClack }) {
+	const directory = basename(specification.destination)
+	const { guidance, setup } = getNextSteps(specification, directory)
+	if (usesClack) {
+		activeSpinner?.stop('Project created')
+		prompts.note([...setup, '', ...guidance].join('\n'), 'Next steps')
+		prompts.outro(`${specification.title} is ready.`)
+		return
+	}
+	output.write(`\n${paint('38;5;114', 'Ready.')} ${specification.title} is in ${paint('38;5;203', directory)}.\n\n`)
+	for (const command of setup) {
+		output.write(`  ${dim('$')} ${command}\n`)
+	}
+	output.write('\n')
+	for (const instruction of guidance) {
+		output.write(`  ${instruction}\n`)
+	}
+	output.write('\n')
+}
+
+function getNextSteps(specification, directory) {
+	const { install, packageManager } = specification
+	return {
+		guidance: [
+			`First slice  ${packageManager} run create:slice -- feature firstFeature`,
+			`Fast gate    ${packageManager} run validate`,
+			`Full gate    ${packageManager} run check`,
+		],
+		setup: [
+			`cd ${directory}`,
+			...(install ? [] : [`${packageManager} install`]),
+			`${packageManager} run dev`,
+		],
 	}
 }

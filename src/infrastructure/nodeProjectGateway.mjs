@@ -53,6 +53,7 @@ export function createNodeProjectGateway({ nodeExecutable, signal }) {
 		return run(nodeExecutable, [
 			'scripts/setup-template.mjs',
 			'--yes',
+			'--quiet',
 			'--name', specification.name,
 			'--title', specification.title,
 			'--description', specification.description,
@@ -74,8 +75,9 @@ export function createNodeProjectGateway({ nodeExecutable, signal }) {
 		return run('git', ['init', '--initial-branch=main'], destination, { signal })
 	}
 
-	function installDependencies(destination, packageManager) {
+	function installDependencies(destination, packageManager, { gitHooks = true } = {}) {
 		return run(packageManager, installCommands[packageManager], destination, {
+			env: gitHooks ? undefined : { ...process.env, HUSKY: '0' },
 			shell: process.platform === 'win32',
 			signal,
 		})
@@ -195,9 +197,9 @@ async function prepareDestination(destination) {
 	return temporaryDestination
 }
 
-function run(command, args, cwd, { shell = false, signal } = {}) {
+function run(command, args, cwd, { env, shell = false, signal } = {}) {
 	return new Promise((resolve, reject) => {
-		const child = spawn(command, args, { cwd, shell, signal, stdio: 'inherit' })
+		const child = spawn(command, args, { cwd, env, shell, signal, stdio: 'inherit' })
 		child.once('error', error => reject(new Error(`Could not run ${command}: ${error.message}`)))
 		child.once('close', code => {
 			if (code === 0) {

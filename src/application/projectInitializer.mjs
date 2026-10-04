@@ -33,7 +33,11 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 				rollbackDestination = specification.destination
 				if (specification.install) {
 					onProgress({ type: 'dependencies.installation.started', specification })
-					await projectGateway.installDependencies(specification.destination, specification.packageManager)
+					await projectGateway.installDependencies(
+						specification.destination,
+						specification.packageManager,
+						{ gitHooks: specification.initGit },
+					)
 				}
 
 				onProgress({ type: 'project.initialized', specification })

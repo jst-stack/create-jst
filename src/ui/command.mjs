@@ -89,6 +89,11 @@ Usage:
 The interactive wizard only asks about decisions that affect the generated project.
 Application title and description are derived from the directory; pass flags only when automation needs overrides.
 
+Examples:
+  npm create jst@latest my-app
+  npm create jst@latest my-app -- --yes --style scss
+  npm create jst@latest jst-showcase -- --example showcase
+
 Options:
   --package-manager <manager>    auto, npm, or pnpm
   --no-install                   create the project without installing dependencies

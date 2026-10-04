@@ -15,7 +15,7 @@ test('orchestrates replaceable gateways and publishes progress', async () => {
 			configurePackageManager: async (_destination, manager) => calls.push(['manager', manager]),
 			configureTemplate: async specification => calls.push(['configure', specification.name]),
 			initializeGit: async () => calls.push(['git']),
-			installDependencies: async (_destination, manager) => calls.push(['install', manager]),
+			installDependencies: async (_destination, manager, options) => calls.push(['install', manager, options]),
 			prepareDestination: async destination => `${destination}.tmp`,
 			validateTemplate: async specification => calls.push(['validate', specification.destination]),
 		},
@@ -41,7 +41,7 @@ test('orchestrates replaceable gateways and publishes progress', async () => {
 		['manager', 'pnpm'],
 		['git'],
 		['commit', '/projects/example.tmp', '/projects/example'],
-		['install', 'pnpm'],
+		['install', 'pnpm', { gitHooks: true }],
 	])
 	assert.deepEqual(published, [
 		'template.download.started',

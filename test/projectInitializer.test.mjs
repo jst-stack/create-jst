@@ -40,8 +40,8 @@ test('orchestrates replaceable gateways and publishes progress', async () => {
 		['configure', 'example'],
 		['manager', 'pnpm'],
 		['git'],
-		['install', 'pnpm'],
 		['commit', '/projects/example.tmp', '/projects/example'],
+		['install', 'pnpm'],
 	])
 	assert.deepEqual(published, [
 		'template.download.started',
@@ -70,4 +70,28 @@ test('removes temporary output and preserves the destination after failure', asy
 
 	await assert.rejects(initializer.execute(specification), /invalid template/)
 	assert.deepEqual(calls, [['cleanup', '/projects/.example.tmp']])
+})
+
+test('removes the committed destination when dependency installation fails', async () => {
+	const calls = []
+	const initializer = createProjectInitializer({
+		projectGateway: {
+			assertDestinationIsEmpty: async () => undefined,
+			cleanupDestination: async destination => calls.push(['cleanup', destination]),
+			commitDestination: async (temporary, destination) => calls.push(['commit', temporary, destination]),
+			configureTemplate: async () => undefined,
+			initializeGit: async () => undefined,
+			installDependencies: async () => { throw new Error('install failed') },
+			prepareDestination: async () => '/projects/.example.tmp',
+			validateTemplate: async () => undefined,
+		},
+		templateGateway: { clone: async () => undefined },
+	})
+	const specification = buildProjectSpecification({ destination: '/projects/example', name: 'example', title: 'Example' })
+
+	await assert.rejects(initializer.execute(specification), /install failed/)
+	assert.deepEqual(calls, [
+		['commit', '/projects/.example.tmp', '/projects/example'],
+		['cleanup', '/projects/example'],
+	])
 })

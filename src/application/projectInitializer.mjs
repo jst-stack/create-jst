@@ -4,6 +4,7 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 			await projectGateway.assertDestinationIsEmpty(specification.destination)
 			const temporaryDestination = await projectGateway.prepareDestination(specification.destination)
 			const temporarySpecification = Object.freeze({ ...specification, destination: temporaryDestination })
+			let rollbackDestination = temporaryDestination
 
 			try {
 			onProgress({ type: 'template.download.started', specification })
@@ -28,16 +29,17 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 					onProgress({ type: 'git.initialization.started', specification })
 					await projectGateway.initializeGit(temporaryDestination)
 				}
+				await projectGateway.commitDestination(temporaryDestination, specification.destination)
+				rollbackDestination = specification.destination
 				if (specification.install) {
 					onProgress({ type: 'dependencies.installation.started', specification })
-					await projectGateway.installDependencies(temporaryDestination, specification.packageManager)
+					await projectGateway.installDependencies(specification.destination, specification.packageManager)
 				}
 
-				await projectGateway.commitDestination(temporaryDestination, specification.destination)
 				onProgress({ type: 'project.initialized', specification })
 			}
 			catch (error) {
-				await projectGateway.cleanupDestination(temporaryDestination)
+				await projectGateway.cleanupDestination(rollbackDestination)
 				throw error
 			}
 		},

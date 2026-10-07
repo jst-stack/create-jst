@@ -4,6 +4,9 @@ Notable changes to `create-jst` are documented here.
 
 ## Unreleased
 
+- Pin JST `v0.4.12` with bounded-context modules, workspace extraction, deterministic npm/pnpm checks, and architecture-policy `0.4.0`.
+- Pin the matching showcase architecture contracts.
+
 ## 0.4.4
 
 - Pin the production-container-verified `v0.4.3` template release.

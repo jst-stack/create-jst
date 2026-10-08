@@ -31,4 +31,11 @@ jobs:
           node --input-type=module --eval
           "import manifest from './package.json' with { type: 'json' };
           if (process.env.GITHUB_REF_NAME !== 'v' + manifest.version) process.exit(1)"
-      - run: npm publish --provenance --access public
+      - name: Check whether the version is already published
+        id: registry
+        run: >-
+          npm view "$npm_package_name@$npm_package_version" version
+          && echo "published=true" >> "$GITHUB_OUTPUT"
+          || true
+      - if: ${{ steps.registry.outputs.published != 'true' }}
+        run: npm publish --provenance --access public

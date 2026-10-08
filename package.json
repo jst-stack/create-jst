@@ -1,6 +1,6 @@
 {
   "name": "create-jst",
-  "version": "0.4.14",
+  "version": "0.4.15",
   "description": "Create a web application from the JST template.",
   "type": "module",
   "packageManager": "npm@11.6.2",

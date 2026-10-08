@@ -165,6 +165,7 @@ async function configurePackageManager(destination, packageManager, signal) {
 			`minimumReleaseAge: 10080
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
+  - '@eslint-react/eslint-plugin'
   - '@jst-stack/eslint-plugin'
 
 trustPolicy: no-downgrade

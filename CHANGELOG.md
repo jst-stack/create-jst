@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.17
+
+- Pin the reproducible JST `v0.4.15` template release.
+
 ## 0.4.16
 
 - Pin JST `v0.4.14` with guided slice composition and a production dependency audit gate.

@@ -23,6 +23,6 @@ jobs:
           node-version: 24.15.0
       - if: ${{ matrix.package-manager == 'pnpm' }}
         run: npm install --global pnpm@10
-      - run: npm create jst@0.4.0 canary-app -- --yes --no-git --package-manager ${{ matrix.package-manager }}
+      - run: npm create jst@latest canary-app -- --yes --no-git --package-manager ${{ matrix.package-manager }}
       - run: ${{ matrix.package-manager }} run check
         working-directory: canary-app

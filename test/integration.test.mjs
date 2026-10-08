@@ -83,8 +83,9 @@ test('configures a selected package manager without installing dependencies', as
 			`minimumReleaseAge: 10080
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
-  - '@eslint-react/eslint-plugin'
-  - '@jst-stack/eslint-plugin'
+  - '@eslint-react/*'
+  - '@jst-stack/*'
+  - 'eslint-plugin-react-*'
 
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 10080

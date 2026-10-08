@@ -2,7 +2,13 @@
 
 Notable changes to `create-jst` are documented here.
 
-## Unreleased
+## 0.4.16
+
+- Pin JST `v0.4.14` with guided slice composition and a production dependency audit gate.
+- Verify the CLI on its declared Node 22 minimum and on the template's Node 24 runtime.
+- Exercise the latest published initializer in scheduled release canaries.
+
+## 0.4.15
 
 - Pin JST `v0.4.13` with portable Windows generators and a container-safe install.
 - Keep pnpm trust checks without rejecting deliberately pinned, newly released dependencies.

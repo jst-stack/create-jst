@@ -29,6 +29,7 @@ jobs:
             --root-dir .
             --no-progress
             --exclude '^https?://(?:localhost|127\.0\.0\.1)'
+            --exclude '^https://github\.com/jst-stack/'
+            --exclude '^https://www\.npmjs\.com/package/'
             './**/*.md'
           token: ${{ secrets.GITHUB_TOKEN }}
-

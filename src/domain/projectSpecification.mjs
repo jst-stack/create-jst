@@ -3,7 +3,7 @@ export const PRIMARY_COLORS = ['dark', 'gray', 'red', 'pink', 'grape', 'violet',
 export const PACKAGE_MANAGERS = ['npm', 'pnpm']
 export const STYLE_LANGUAGES = ['css', 'scss']
 export const EXAMPLES = ['clean', 'showcase']
-export const TEMPLATE_SOURCE = 'jst-stack/jst#v0.4.16'
+export const TEMPLATE_SOURCE = 'jst-stack/jst#v0.4.18'
 export const SHOWCASE_SOURCE = 'jst-stack/jst-showcase#0956075b116abc85d0ad9aacc2f964d0d2672968'
 
 export function buildProjectSpecification(input) {
@@ -54,7 +54,7 @@ export function validateProjectSpecification(specification) {
 }
 
 export function normalizePackageName(value) {
-	return value.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'jst-app'
+	return value.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '') || 'jst-app'
 }
 
 export function toTitle(value) {

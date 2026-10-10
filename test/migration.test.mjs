@@ -19,3 +19,14 @@ test('keeps dry runs read-only', async () => {
 	assert.equal(writes, 0)
 	assert.deepEqual(result.changedFiles, ['eslint.config.js', 'jst.config.ts'])
 })
+
+test('terminates safely for adversarial migration versions', () => {
+	const versions = ['', '0', '0.3', '0.3.0\0', '../0.3.0', 'v0.3.0', '999.999.999']
+	for (let index = 0; index < 256; index += 1) {
+		versions.push(`${index}.${255 - index}.${index % 17}`)
+	}
+	for (const version of versions) {
+		assert.throws(() => resolveMigrationPath(version), /No supported migration path/u)
+	}
+	assert.deepEqual(resolveMigrationPath('0.4.0'), [])
+})

@@ -2,6 +2,12 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.19
+
+- Pin JST `v0.4.18` and architecture policy `0.4.4`.
+- Keep generated package names valid under adversarial directory input.
+- Exercise CLI conflicts and migration termination with deterministic generated cases.
+
 ## 0.4.18
 
 - Pin JST `v0.4.16` with the published `@jst-stack/eslint-plugin` `0.4.3` policy and sponsor-ready project documentation.

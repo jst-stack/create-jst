@@ -1,5 +1,9 @@
 # create-jst
 
+[![npm](https://img.shields.io/npm/v/create-jst?style=flat-square)](https://www.npmjs.com/package/create-jst)
+[![CI](https://img.shields.io/github/actions/workflow/status/jst-stack/create-jst/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/jst-stack/create-jst/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/jst-stack/create-jst/badge)](https://scorecard.dev/viewer/?uri=github.com/jst-stack/create-jst)
+
 Create a web application from the [JST](https://github.com/jst-stack/jst) template.
 
 ```bash
@@ -27,3 +31,7 @@ npx --package=create-jst jst migrate --from 0.3.0 --to 0.4.0
 ```
 
 Migrations reject unsupported paths and customized source shapes before writing. Applied files are restored if the project quality gate fails.
+
+## Contributing and support
+
+Use [JST Discussions](https://github.com/jst-stack/jst/discussions) for usage questions. Report reproducible CLI defects through this repository's issue form. Contributions follow the organization [contribution guide](https://github.com/jst-stack/.github/blob/main/CONTRIBUTING.md) and [governance](https://github.com/jst-stack/.github/blob/main/GOVERNANCE.md).

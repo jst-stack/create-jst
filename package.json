@@ -31,6 +31,14 @@
     "url": "https://github.com/jst-stack/create-jst/issues"
   },
   "homepage": "https://github.com/jst-stack/jst#readme",
+  "keywords": [
+    "architecture",
+    "create-app",
+    "react",
+    "ssr",
+    "starter",
+    "typescript"
+  ],
   "license": "MIT",
   "dependencies": {
     "@clack/prompts": "^1.8.1",

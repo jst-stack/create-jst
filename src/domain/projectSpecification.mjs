@@ -3,7 +3,7 @@ export const PRIMARY_COLORS = ['dark', 'gray', 'red', 'pink', 'grape', 'violet',
 export const PACKAGE_MANAGERS = ['npm', 'pnpm']
 export const STYLE_LANGUAGES = ['css', 'scss']
 export const EXAMPLES = ['clean', 'showcase']
-export const TEMPLATE_SOURCE = 'jst-stack/jst#v0.4.21'
+export const TEMPLATE_SOURCE = 'jst-stack/jst#v0.4.22'
 export const SHOWCASE_SOURCE = 'jst-stack/jst-showcase#33239c1447f9cd82c3a148ebd0216aa3225eeceb'
 
 export function buildProjectSpecification(input) {

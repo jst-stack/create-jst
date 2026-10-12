@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.20
+
+- Pin JST `v0.4.19` with safer Reatom guidance and a generated-slice reachability gate that stays red until composition.
+
 ## 0.4.19
 
 - Pin JST `v0.4.18` and architecture policy `0.4.4`.

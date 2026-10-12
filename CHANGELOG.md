@@ -2,6 +2,11 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.21
+
+- Repair showcase creation by pinning an available immutable commit.
+- Verify the remote showcase source and its complete quality gate in CI and the released-artifact canary.
+
 ## 0.4.20
 
 - Pin JST `v0.4.19` with safer Reatom guidance and a generated-slice reachability gate that stays red until composition.

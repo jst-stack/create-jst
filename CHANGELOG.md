@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.26
+
+- Pin JST `v0.4.25` with structured architecture diagnostics and the cross-platform five-minute repair proof.
+
 ## 0.4.25
 
 - Pin JST `v0.4.24` with the project-local `@jst-stack/mcp` server, task-sized agent context, guarded architecture workflows, and pnpm-compatible dependency ages.

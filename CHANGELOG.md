@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.27
+
+- Pin JST `v0.4.26` with the npm-version fix for Linux, macOS, and Windows architecture-proof jobs.
+
 ## 0.4.26
 
 - Pin JST `v0.4.25` with structured architecture diagnostics and the cross-platform five-minute repair proof.

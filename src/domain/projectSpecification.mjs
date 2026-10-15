@@ -4,7 +4,7 @@ export const PACKAGE_MANAGERS = ['npm', 'pnpm']
 export const STYLE_LANGUAGES = ['css', 'scss']
 export const EXAMPLES = ['clean', 'showcase']
 export const TEMPLATE_SOURCE = 'jst-stack/jst#v0.4.27'
-export const SHOWCASE_SOURCE = 'jst-stack/jst-showcase#33239c1447f9cd82c3a148ebd0216aa3225eeceb'
+export const SHOWCASE_SOURCE = 'jst-stack/jst-showcase#89d7636fcc23032b3f4d84f78338e2b4872eb346'
 
 export function buildProjectSpecification(input) {
 	const specification = Object.freeze({

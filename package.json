@@ -14,11 +14,12 @@
   "engines": {
     "node": ">=22.14.0"
   },
-  "scripts": {
+	"scripts": {
+		"audit:sources": "node scripts/audit-sources.mjs",
     "lint": "eslint . --max-warnings 0",
     "benchmark": "node scripts/run-benchmarks.mjs",
     "benchmark:update": "node scripts/run-benchmarks.mjs --write-baseline",
-    "test": "node --test test/integration.test.mjs test/migration.test.mjs test/options.test.mjs test/projectInitializer.test.mjs",
+		"test": "node --test test/integration.test.mjs test/migration.test.mjs test/nodeProjectGateway.test.mjs test/options.test.mjs test/projectInitializer.test.mjs",
     "test:generated": "node --test test/generatedProject.test.mjs",
     "check": "npm run lint && npm test && npm pack --dry-run",
     "prepublishOnly": "npm run check"

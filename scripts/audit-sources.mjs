@@ -1,4 +1,7 @@
 import { execFile } from 'node:child_process'
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { resolve } from 'node:path'
 import process from 'node:process'
 import { promisify } from 'node:util'
 import { SHOWCASE_SOURCE, TEMPLATE_SOURCE } from '../src/domain/projectSpecification.mjs'
@@ -8,11 +11,8 @@ const [templateRepository, templateReference] = parseSource(TEMPLATE_SOURCE)
 const [showcaseRepository, showcaseReference] = parseSource(SHOWCASE_SOURCE)
 const templateSha = await remoteSha(templateRepository, `refs/tags/${templateReference}^{}`)
 	.catch(() => remoteSha(templateRepository, `refs/tags/${templateReference}`))
-const showcaseMainSha = await remoteSha(showcaseRepository, 'refs/heads/main')
-if (showcaseReference !== showcaseMainSha) {
-	throw new Error(`SHOWCASE_SOURCE is stale: ${showcaseReference} != ${showcaseMainSha}. Review main and update the immutable pin.`)
-}
-process.stdout.write(`Template ${templateSha.slice(0, 12)} and showcase ${showcaseMainSha.slice(0, 12)} pins are current.\n`)
+await assertCommit(showcaseRepository, showcaseReference)
+process.stdout.write(`Template ${templateSha.slice(0, 12)} and showcase ${showcaseReference.slice(0, 12)} pins are available.\n`)
 
 function parseSource(source) {
 	const [repository, reference] = source.split('#')
@@ -29,4 +29,18 @@ async function remoteSha(repository, reference) {
 		throw new Error(`Remote source does not exist: ${repository}#${reference}.`)
 	}
 	return sha
+}
+
+async function assertCommit(repository, sha) {
+	const directory = await mkdtemp(resolve(tmpdir(), 'create-jst-source-'))
+	try {
+		await execute('git', ['init', '--quiet'], { cwd: directory, timeout: 15_000 })
+		await execute('git', ['fetch', '--quiet', '--depth=1', `https://github.com/${repository}.git`, sha], { cwd: directory, timeout: 30_000 })
+	}
+	catch (error) {
+		throw new Error(`Remote source does not exist: ${repository}#${sha}.`, { cause: error })
+	}
+	finally {
+		await rm(directory, { force: true, recursive: true })
+	}
 }

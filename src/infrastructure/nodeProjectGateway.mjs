@@ -12,15 +12,16 @@ const installCommands = {
 }
 const pnpmAction = 'pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0'
 const textExtensions = new Set(['.md', '.mjs', '.yaml', '.yml'])
+const commandTimeout = 600_000
 
-export function createNodeProjectGateway({ nodeExecutable, signal }) {
+export function createNodeProjectGateway({ nodeExecutable, signal, timeout = commandTimeout }) {
 	return {
 		assertDestinationIsEmpty,
 		assertRuntimeSupported,
 		cleanupDestination,
 		commitDestination,
 		configureExample,
-		configurePackageManager: (destination, packageManager) => configurePackageManager(destination, packageManager, signal),
+		configurePackageManager: (destination, packageManager) => configurePackageManager(destination, packageManager, signal, timeout),
 		configureTemplate,
 		initializeGit,
 		installDependencies,
@@ -63,11 +64,11 @@ export function createNodeProjectGateway({ nodeExecutable, signal }) {
 			'--color-scheme', specification.colorScheme,
 			'--primary-color', specification.primaryColor,
 			'--style', specification.style,
-		], specification.destination, { signal })
+		], specification.destination, { signal, timeout })
 	}
 
 	function initializeGit(destination) {
-		return run('git', ['init', '--initial-branch=main'], destination, { signal })
+		return run('git', ['init', '--initial-branch=main'], destination, { signal, timeout })
 	}
 
 	function installDependencies(destination, packageManager, { gitHooks = true } = {}) {
@@ -75,6 +76,7 @@ export function createNodeProjectGateway({ nodeExecutable, signal }) {
 			env: gitHooks ? undefined : { ...process.env, HUSKY: '0' },
 			shell: process.platform === 'win32',
 			signal,
+			timeout,
 		})
 	}
 
@@ -132,7 +134,7 @@ function compareVersions(left, right) {
 	return 0
 }
 
-async function configurePackageManager(destination, packageManager, signal) {
+async function configurePackageManager(destination, packageManager, signal, timeout) {
 	const manifestPath = join(destination, 'package.json')
 	const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
 	delete manifest.packageManager
@@ -145,6 +147,7 @@ async function configurePackageManager(destination, packageManager, signal) {
 			cwd: destination,
 			shell: process.platform === 'win32',
 			signal,
+			timeout,
 		}))
 	}
 	catch {
@@ -230,13 +233,17 @@ async function prepareDestination(destination) {
 	return temporaryDestination
 }
 
-function run(command, args, cwd, { env, shell = false, signal } = {}) {
+function run(command, args, cwd, { env, shell = false, signal, timeout } = {}) {
 	return new Promise((resolve, reject) => {
-		const child = spawn(command, args, { cwd, env, shell, signal, stdio: 'inherit' })
+		const child = spawn(command, args, { cwd, env, shell, signal, stdio: 'inherit', timeout })
 		child.once('error', error => reject(new Error(`Could not run ${command}: ${error.message}`)))
-		child.once('close', code => {
+		child.once('close', (code, terminationSignal) => {
 			if (code === 0) {
 				resolve()
+				return
+			}
+			if (terminationSignal && !signal?.aborted) {
+				reject(new Error(`${command} timed out after ${timeout}ms.`))
 				return
 			}
 			reject(new Error(`${command} ${args.join(' ')} failed with exit code ${code}.`))

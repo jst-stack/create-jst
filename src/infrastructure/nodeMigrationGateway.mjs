@@ -5,12 +5,13 @@ import process from 'node:process'
 import { promisify } from 'node:util'
 
 const executeFile = promisify(execFile)
+const commandTimeout = 600_000
 
 export function createNodeMigrationGateway() {
 	return {
 		async assertSafeGitState(directory) {
 			try {
-				const { stdout } = await executeFile('git', ['status', '--porcelain'], { cwd: directory })
+				const { stdout } = await executeFile('git', ['status', '--porcelain'], { cwd: directory, timeout: commandTimeout })
 				if (stdout.trim()) {
 					throw new Error('Migration requires a clean Git working tree.')
 				}
@@ -36,6 +37,7 @@ export function createNodeMigrationGateway() {
 			return executeFile(packageManager, ['run', 'check'], {
 				cwd: directory,
 				shell: process.platform === 'win32',
+				timeout: commandTimeout,
 			})
 		},
 		async writeTransaction(directory, files, verify) {

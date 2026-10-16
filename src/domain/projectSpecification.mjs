@@ -18,8 +18,8 @@ export const PRIMARY_COLORS = [
 export const PACKAGE_MANAGERS = ['npm', 'pnpm']
 export const STYLE_LANGUAGES = ['css', 'scss']
 export const EXAMPLES = ['clean', 'showcase']
-export const TEMPLATE_SOURCE = 'jst-stack/jst#v0.4.27'
-export const SHOWCASE_SOURCE = 'jst-stack/jst-showcase#07ce0a9704f09fff66892d7df6861b2faa58fd35'
+export const TEMPLATE_SOURCE = 'jst-stack/jst#v0.4.28'
+export const SHOWCASE_SOURCE = 'jst-stack/jst-showcase#da0fbe07b2a2d529dce7a0178ea756caa87238f4'
 
 export function buildProjectSpecification(input) {
 	const specification = Object.freeze({

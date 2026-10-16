@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.29
+
+- Pin JST `v0.4.28` with split quality and architecture enforcement and the refreshed showcase pin.
+
 ## 0.4.28
 
 - Pin JST `v0.4.27` with validated architecture-proof diagnostics across all supported platforms.

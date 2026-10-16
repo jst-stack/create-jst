@@ -18,7 +18,7 @@ export const PRIMARY_COLORS = [
 export const PACKAGE_MANAGERS = ['npm', 'pnpm']
 export const STYLE_LANGUAGES = ['css', 'scss']
 export const EXAMPLES = ['clean', 'showcase']
-export const TEMPLATE_SOURCE = 'jst-stack/jst#v0.4.28'
+export const TEMPLATE_SOURCE = 'jst-stack/jst#v0.4.29'
 export const SHOWCASE_SOURCE = 'jst-stack/jst-showcase#da0fbe07b2a2d529dce7a0178ea756caa87238f4'
 
 export function buildProjectSpecification(input) {

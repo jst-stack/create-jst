@@ -7,7 +7,7 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 			let rollbackDestination = temporaryDestination
 
 			try {
-			onProgress({ type: 'template.download.started', specification })
+				onProgress({ type: 'template.download.started', specification })
 				await templateGateway.clone(specification.template, temporaryDestination)
 				if (specification.example === 'clean') {
 					await projectGateway.validateTemplate(temporarySpecification)
@@ -16,8 +16,7 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 				onProgress({ type: 'project.configuration.started', specification })
 				if (specification.example === 'showcase') {
 					await projectGateway.configureExample(temporarySpecification)
-				}
-				else {
+				} else {
 					await projectGateway.configureTemplate(temporarySpecification)
 				}
 
@@ -28,8 +27,7 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 				if (specification.initGit) {
 					onProgress({ type: 'git.initialization.started', specification })
 					await projectGateway.initializeGit(temporaryDestination)
-				}
-				else {
+				} else {
 					await projectGateway.removeGitMetadata(temporaryDestination)
 				}
 				if (specification.install) {
@@ -39,16 +37,13 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 				rollbackDestination = specification.destination
 				if (specification.install) {
 					onProgress({ type: 'dependencies.installation.started', specification })
-					await projectGateway.installDependencies(
-						specification.destination,
-						specification.packageManager,
-						{ gitHooks: specification.initGit },
-					)
+					await projectGateway.installDependencies(specification.destination, specification.packageManager, {
+						gitHooks: specification.initGit,
+					})
 				}
 
 				onProgress({ type: 'project.initialized', specification })
-			}
-			catch (error) {
+			} catch (error) {
 				await projectGateway.cleanupDestination(rollbackDestination)
 				throw error
 			}

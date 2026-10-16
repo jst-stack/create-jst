@@ -26,10 +26,12 @@ test('detects the package manager that invoked the initializer', () => {
 })
 
 test('resolves the auto package manager choice from the invoking client', async () => {
-	const request = await resolveProjectRequest(
-		parseCommandLine(['my-app', '--yes', '--package-manager', 'auto']),
-		{ cwd: () => '/tmp', env: { npm_config_user_agent: 'pnpm/10.0.0 npm/? node/v24.0.0' }, stdin: { isTTY: false }, stdout: { write() {} } },
-	)
+	const request = await resolveProjectRequest(parseCommandLine(['my-app', '--yes', '--package-manager', 'auto']), {
+		cwd: () => '/tmp',
+		env: { npm_config_user_agent: 'pnpm/10.0.0 npm/? node/v24.0.0' },
+		stdin: { isTTY: false },
+		stdout: { write() {} },
+	})
 	assert.equal(request.specification.packageManager, 'pnpm')
 })
 
@@ -45,14 +47,14 @@ test('pins clean and showcase requests to immutable sources', async () => {
 })
 
 test('normalizes adversarial project names to stable npm-safe values', () => {
-	let state = 0x5EED_C0DE
+	let state = 0x5eed_c0de
 	for (let index = 0; index < 512; index += 1) {
 		state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0
 		const length = state % 48
 		let candidate = ''
 		for (let offset = 0; offset < length; offset += 1) {
 			state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0
-			candidate += String.fromCodePoint(32 + state % 95)
+			candidate += String.fromCodePoint(32 + (state % 95))
 		}
 		const normalized = normalizePackageName(candidate)
 		assert.match(normalized, /^[a-z0-9][a-z0-9._-]*$/u)

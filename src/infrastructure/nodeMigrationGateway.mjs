@@ -15,8 +15,7 @@ export function createNodeMigrationGateway() {
 				if (stdout.trim()) {
 					throw new Error('Migration requires a clean Git working tree.')
 				}
-			}
-			catch (error) {
+			} catch (error) {
 				if (error.message === 'Migration requires a clean Git working tree.') {
 					throw error
 				}
@@ -24,7 +23,7 @@ export function createNodeMigrationGateway() {
 			}
 		},
 		async readMigrationFiles(directory, migrations) {
-			const names = new Set(migrations.flatMap(migration => migration.files))
+			const names = new Set(migrations.flatMap((migration) => migration.files))
 			const files = new Map()
 			for (const name of names) {
 				files.set(name, await readFile(join(directory, name), 'utf8'))
@@ -45,8 +44,7 @@ export function createNodeMigrationGateway() {
 			for (const name of files.keys()) {
 				try {
 					originals.set(name, await readFile(join(directory, name), 'utf8'))
-				}
-				catch (error) {
+				} catch (error) {
 					if (error.code !== 'ENOENT') {
 						throw error
 					}
@@ -57,13 +55,11 @@ export function createNodeMigrationGateway() {
 					await writeFile(join(directory, name), content)
 				}
 				await verify()
-			}
-			catch (error) {
+			} catch (error) {
 				for (const name of files.keys()) {
 					if (originals.has(name)) {
 						await writeFile(join(directory, name), originals.get(name))
-					}
-					else {
+					} else {
 						await rm(join(directory, name), { force: true })
 					}
 				}

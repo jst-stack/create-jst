@@ -14,8 +14,7 @@ try {
 	if (process.argv.includes('--write-baseline')) {
 		await mkdir(dirname(baselinePath.pathname), { recursive: true })
 		await writeFile(baselinePath, `${JSON.stringify({ result, tolerance: 0.2 }, null, 2)}\n`)
-	}
-	else {
+	} else {
 		const baseline = JSON.parse(await readFile(baselinePath, 'utf8'))
 		const maximum = baseline.result.wallMs * (1 + baseline.tolerance) + 100
 		if (result.wallMs > maximum) {
@@ -23,8 +22,7 @@ try {
 		}
 	}
 	process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
-}
-finally {
+} finally {
 	await rm(root, { force: true, recursive: true })
 }
 
@@ -32,8 +30,14 @@ async function createFixture(root) {
 	const template = join(root, 'template')
 	await mkdir(join(template, 'scripts'), { recursive: true })
 	await writeFile(join(template, 'package.json'), '{"name":"template","scripts":{"template:setup":"node scripts/setup-template.mjs"}}\n')
-	await writeFile(join(template, 'jst.template.json'), '{"schemaVersion":1,"templateVersion":"benchmark","options":{"colorSchemes":["dark"],"primaryColors":["lime"],"styles":["css"]}}\n')
-	await writeFile(join(template, 'scripts/setup-template.mjs'), "import { rm } from 'node:fs/promises'\nawait rm('scripts/setup-template.mjs')\n")
+	await writeFile(
+		join(template, 'jst.template.json'),
+		'{"schemaVersion":1,"templateVersion":"benchmark","options":{"colorSchemes":["dark"],"primaryColors":["lime"],"styles":["css"]}}\n',
+	)
+	await writeFile(
+		join(template, 'scripts/setup-template.mjs'),
+		"import { rm } from 'node:fs/promises'\nawait rm('scripts/setup-template.mjs')\n",
+	)
 	return template
 }
 

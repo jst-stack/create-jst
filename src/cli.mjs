@@ -30,17 +30,16 @@ export async function run(argv, environment = process, injectedApplication) {
 		}
 
 		reporter.start(request)
-		const application = injectedApplication ?? createProjectApplication({ onProgress: event => reporter.progress(event), signal: signals.signal })
+		const application =
+			injectedApplication ?? createProjectApplication({ onProgress: (event) => reporter.progress(event), signal: signals.signal })
 		await application.initializer.execute(request.specification)
-	}
-	catch (error) {
+	} catch (error) {
 		if (error instanceof Error && error.name === 'PromptCancelledError') {
 			return
 		}
 		reporter.error(error instanceof Error ? error.message : String(error))
 		environment.exitCode = 1
-	}
-	finally {
+	} finally {
 		signals.dispose()
 	}
 }

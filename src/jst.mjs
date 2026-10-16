@@ -15,19 +15,34 @@ export async function run(argv, environment = process, migrator = createProjectM
 			return
 		}
 		const migrations = resolveMigrationPath(command.from, command.to)
-		const result = await migrator.execute({ directory: environment.cwd(), dryRun: command.dryRun, from: command.from, migrations, to: command.to ?? migrations.at(-1)?.to ?? command.from })
-		environment.stdout.write(`${command.dryRun ? 'Would migrate' : 'Migrated'} ${result.from} → ${result.to}: ${result.changedFiles.join(', ')}\n`)
-	}
-	catch (error) {
+		const result = await migrator.execute({
+			directory: environment.cwd(),
+			dryRun: command.dryRun,
+			from: command.from,
+			migrations,
+			to: command.to ?? migrations.at(-1)?.to ?? command.from,
+		})
+		environment.stdout.write(
+			`${command.dryRun ? 'Would migrate' : 'Migrated'} ${result.from} → ${result.to}: ${result.changedFiles.join(', ')}\n`,
+		)
+	} catch (error) {
 		environment.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
 		environment.exitCode = 1
 	}
 }
 
 function parseCommand(argv) {
-	const { positionals, values } = parseArgs({ args: argv, allowPositionals: true, options: {
-		'dry-run': { type: 'boolean' }, from: { type: 'string' }, to: { type: 'string' }, help: { short: 'h', type: 'boolean' },
-	}, strict: true })
+	const { positionals, values } = parseArgs({
+		args: argv,
+		allowPositionals: true,
+		options: {
+			'dry-run': { type: 'boolean' },
+			from: { type: 'string' },
+			to: { type: 'string' },
+			help: { short: 'h', type: 'boolean' },
+		},
+		strict: true,
+	})
 	const help = Boolean(values.help || positionals[0] !== 'migrate')
 	if (!help && !values.from) {
 		throw new Error('--from is required.')

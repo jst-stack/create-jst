@@ -1,7 +1,14 @@
 import { basename, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import * as prompts from '@clack/prompts'
-import { buildProjectSpecification, EXAMPLES, normalizePackageName, PACKAGE_MANAGERS, STYLE_LANGUAGES, toTitle } from '../domain/projectSpecification.mjs'
+import {
+	buildProjectSpecification,
+	EXAMPLES,
+	normalizePackageName,
+	PACKAGE_MANAGERS,
+	STYLE_LANGUAGES,
+	toTitle,
+} from '../domain/projectSpecification.mjs'
 
 export function parseCommandLine(args) {
 	return parseArgs({
@@ -9,24 +16,24 @@ export function parseCommandLine(args) {
 		args,
 		options: {
 			'color-scheme': { type: 'string' },
-			'description': { type: 'string' },
+			description: { type: 'string' },
 			'dry-run': { type: 'boolean' },
-			'example': { type: 'string' },
-			'git': { type: 'boolean' },
-			'help': { short: 'h', type: 'boolean' },
-			'lang': { type: 'string' },
-			'name': { type: 'string' },
+			example: { type: 'string' },
+			git: { type: 'boolean' },
+			help: { short: 'h', type: 'boolean' },
+			lang: { type: 'string' },
+			name: { type: 'string' },
 			'no-git': { type: 'boolean' },
 			'no-install': { type: 'boolean' },
 			'no-interactive': { type: 'boolean' },
 			'package-manager': { type: 'string' },
 			'primary-color': { type: 'string' },
 			'skip-install': { type: 'boolean' },
-			'style': { type: 'string' },
-			'template': { type: 'string' },
-			'title': { type: 'string' },
-			'version': { short: 'v', type: 'boolean' },
-			'yes': { short: 'y', type: 'boolean' },
+			style: { type: 'string' },
+			template: { type: 'string' },
+			title: { type: 'string' },
+			version: { short: 'v', type: 'boolean' },
+			yes: { short: 'y', type: 'boolean' },
 		},
 		strict: true,
 	})
@@ -42,9 +49,7 @@ export async function resolveProjectRequest(command, environment) {
 		const packageManager = await resolvePackageManager(values, environment, prompt)
 		const decisions = await resolveProjectDecisions(values, prompt)
 		const example = values.example ?? 'clean'
-		const style = values.style
-			?? await prompt?.choice('CSS Modules language', STYLE_LANGUAGES, 'css')
-			?? 'css'
+		const style = values.style ?? (await prompt?.choice('CSS Modules language', STYLE_LANGUAGES, 'css')) ?? 'css'
 
 		return {
 			dryRun: values['dry-run'] ?? false,
@@ -66,8 +71,7 @@ export async function resolveProjectRequest(command, environment) {
 				title: identity.title,
 			}),
 		}
-	}
-	finally {
+	} finally {
 		prompt?.close()
 	}
 }
@@ -121,11 +125,13 @@ async function createPrompt(environment, values) {
 	prompts.intro('create-jst')
 	return {
 		async choice(label, choices, fallback) {
-			return resolvePrompt(await prompts.select({
-				initialValue: fallback,
-				message: label,
-				options: choices.map(value => ({ hint: choiceHint(value), label: value, value })),
-			}))
+			return resolvePrompt(
+				await prompts.select({
+					initialValue: fallback,
+					message: label,
+					options: choices.map((value) => ({ hint: choiceHint(value), label: value, value })),
+				}),
+			)
 		},
 		close() {
 			return undefined
@@ -171,11 +177,8 @@ function validateCommand(positionals, values) {
 }
 
 async function resolveProjectIdentity(positionals, values, environment, prompt) {
-	const directory = positionals[0]
-		?? await prompt?.text('Project directory', 'my-jst-app')
-		?? 'my-jst-app'
-	const name = values.name
-		?? normalizePackageName(basename(resolve(environment.cwd(), directory)))
+	const directory = positionals[0] ?? (await prompt?.text('Project directory', 'my-jst-app')) ?? 'my-jst-app'
+	const name = values.name ?? normalizePackageName(basename(resolve(environment.cwd(), directory)))
 
 	return {
 		directory,
@@ -186,9 +189,7 @@ async function resolveProjectIdentity(positionals, values, environment, prompt) 
 
 async function resolvePackageManager(values, environment, prompt) {
 	const detected = detectPackageManager(environment.env)
-	const requested = values['package-manager']
-		?? await prompt?.choice('Package manager', PACKAGE_MANAGERS, detected)
-		?? detected
+	const requested = values['package-manager'] ?? (await prompt?.choice('Package manager', PACKAGE_MANAGERS, detected)) ?? detected
 
 	return requested === 'auto' ? detected : requested
 }

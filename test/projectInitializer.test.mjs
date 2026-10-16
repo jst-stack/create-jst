@@ -7,19 +7,19 @@ test('orchestrates replaceable gateways and publishes progress', async () => {
 	const calls = []
 	const published = []
 	const initializer = createProjectInitializer({
-		onProgress: event => published.push(event.type),
+		onProgress: (event) => published.push(event.type),
 		projectGateway: {
-			assertDestinationIsEmpty: async destination => calls.push(['assert', destination]),
-			assertRuntimeSupported: async destination => calls.push(['runtime', destination]),
-			cleanupDestination: async destination => calls.push(['cleanup', destination]),
+			assertDestinationIsEmpty: async (destination) => calls.push(['assert', destination]),
+			assertRuntimeSupported: async (destination) => calls.push(['runtime', destination]),
+			cleanupDestination: async (destination) => calls.push(['cleanup', destination]),
 			commitDestination: async (temporary, destination) => calls.push(['commit', temporary, destination]),
 			configurePackageManager: async (_destination, manager) => calls.push(['manager', manager]),
-			configureTemplate: async specification => calls.push(['configure', specification.name]),
+			configureTemplate: async (specification) => calls.push(['configure', specification.name]),
 			initializeGit: async () => calls.push(['git']),
 			installDependencies: async (_destination, manager, options) => calls.push(['install', manager, options]),
-			prepareDestination: async destination => `${destination}.tmp`,
-			removeGitMetadata: async destination => calls.push(['remove-git', destination]),
-			validateTemplate: async specification => calls.push(['validate', specification.destination]),
+			prepareDestination: async (destination) => `${destination}.tmp`,
+			removeGitMetadata: async (destination) => calls.push(['remove-git', destination]),
+			validateTemplate: async (specification) => calls.push(['validate', specification.destination]),
 		},
 		templateGateway: {
 			clone: async (source, destination) => calls.push(['clone', source, destination]),
@@ -62,9 +62,11 @@ test('removes temporary output and preserves the destination after failure', asy
 		projectGateway: {
 			assertDestinationIsEmpty: async () => undefined,
 			assertRuntimeSupported: async () => undefined,
-			cleanupDestination: async destination => calls.push(['cleanup', destination]),
+			cleanupDestination: async (destination) => calls.push(['cleanup', destination]),
 			commitDestination: async () => calls.push(['commit']),
-			configureTemplate: async () => { throw new Error('invalid template') },
+			configureTemplate: async () => {
+				throw new Error('invalid template')
+			},
 			prepareDestination: async () => '/projects/.example.tmp',
 			removeGitMetadata: async () => undefined,
 			validateTemplate: async () => undefined,
@@ -83,11 +85,13 @@ test('removes the committed destination when dependency installation fails', asy
 		projectGateway: {
 			assertDestinationIsEmpty: async () => undefined,
 			assertRuntimeSupported: async () => undefined,
-			cleanupDestination: async destination => calls.push(['cleanup', destination]),
+			cleanupDestination: async (destination) => calls.push(['cleanup', destination]),
 			commitDestination: async (temporary, destination) => calls.push(['commit', temporary, destination]),
 			configureTemplate: async () => undefined,
 			initializeGit: async () => undefined,
-			installDependencies: async () => { throw new Error('install failed') },
+			installDependencies: async () => {
+				throw new Error('install failed')
+			},
 			prepareDestination: async () => '/projects/.example.tmp',
 			removeGitMetadata: async () => undefined,
 			validateTemplate: async () => undefined,

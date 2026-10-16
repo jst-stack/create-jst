@@ -2,17 +2,17 @@ import { basename } from 'node:path'
 import * as prompts from '@clack/prompts'
 
 const progressMessages = {
-	'dependencies.installation.started': specification => `Installing dependencies with ${specification.packageManager}`,
+	'dependencies.installation.started': (specification) => `Installing dependencies with ${specification.packageManager}`,
 	'git.initialization.started': () => 'Initialising Git',
-	'package-manager.configuration.started': specification => `Preparing ${specification.packageManager}`,
-	'project.configuration.started': specification => `Configuring ${specification.title}`,
-	'template.download.started': specification => `Downloading ${specification.template}`,
+	'package-manager.configuration.started': (specification) => `Preparing ${specification.packageManager}`,
+	'project.configuration.started': (specification) => `Configuring ${specification.title}`,
+	'template.download.started': (specification) => `Downloading ${specification.template}`,
 }
 
 export function createReporter(output, environment = {}) {
 	const color = Boolean(output.isTTY) && !environment.NO_COLOR
-	const paint = (code, value) => color ? `\u001B[${code}m${value}\u001B[0m` : value
-	const dim = value => paint('2', value)
+	const paint = (code, value) => (color ? `\u001B[${code}m${value}\u001B[0m` : value)
+	const dim = (value) => paint('2', value)
 	let activeSpinner
 	let usesClack = false
 
@@ -31,12 +31,15 @@ export function createReporter(output, environment = {}) {
 				if (!request.interactive) {
 					prompts.intro('create-jst')
 				}
-				prompts.note([
-					`Template: ${specification.template}`,
-					`Package manager: ${specification.packageManager}`,
-					`Install dependencies: ${specification.install ? 'yes' : 'no'}`,
-					`Initialize Git: ${specification.initGit ? 'yes' : 'no'}`,
-				].join('\n'), specification.destination)
+				prompts.note(
+					[
+						`Template: ${specification.template}`,
+						`Package manager: ${specification.packageManager}`,
+						`Install dependencies: ${specification.install ? 'yes' : 'no'}`,
+						`Initialize Git: ${specification.initGit ? 'yes' : 'no'}`,
+					].join('\n'),
+					specification.destination,
+				)
 				prompts.outro('Dry run complete — no files were written.')
 				return
 			}
@@ -58,20 +61,20 @@ export function createReporter(output, environment = {}) {
 			output.write(`\n${paint('38;5;203', 'JST')} ${dim('A foundation for replaceable layers')}\n\n`)
 		},
 		progress(event) {
-				if (event.type === 'project.initialized') {
-					return this.success(event.specification)
-				}
-				const message = progressMessages[event.type]
-				if (!message) {
-					return
-				}
-				if (usesClack) {
-					activeSpinner?.stop()
-					activeSpinner = prompts.spinner()
-					activeSpinner.start(message(event.specification))
-					return
-				}
-				output.write(`${dim('  ◌')} ${message(event.specification)}\n`)
+			if (event.type === 'project.initialized') {
+				return this.success(event.specification)
+			}
+			const message = progressMessages[event.type]
+			if (!message) {
+				return
+			}
+			if (usesClack) {
+				activeSpinner?.stop()
+				activeSpinner = prompts.spinner()
+				activeSpinner.start(message(event.specification))
+				return
+			}
+			output.write(`${dim('  ◌')} ${message(event.specification)}\n`)
 		},
 		success(specification) {
 			renderSuccess({ activeSpinner, dim, output, paint, specification, usesClack })
@@ -107,10 +110,6 @@ function getNextSteps(specification, directory) {
 			`Fast gate    ${packageManager} run validate`,
 			`Release gate ${packageManager} run check:release`,
 		],
-		setup: [
-			`cd ${directory}`,
-			...(install ? [] : [`${packageManager} install`]),
-			`${packageManager} run dev`,
-		],
+		setup: [`cd ${directory}`, ...(install ? [] : [`${packageManager} install`]), `${packageManager} run dev`],
 	}
 }

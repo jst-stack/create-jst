@@ -53,18 +53,30 @@ export function createNodeProjectGateway({ nodeExecutable, signal, timeout = com
 	}
 
 	function configureTemplate(specification) {
-		return run(nodeExecutable, [
-			'scripts/setup-template.mjs',
-			'--yes',
-			'--quiet',
-			'--name', specification.name,
-			'--title', specification.title,
-			'--description', specification.description,
-			'--lang', specification.language,
-			'--color-scheme', specification.colorScheme,
-			'--primary-color', specification.primaryColor,
-			'--style', specification.style,
-		], specification.destination, { signal, timeout })
+		return run(
+			nodeExecutable,
+			[
+				'scripts/setup-template.mjs',
+				'--yes',
+				'--quiet',
+				'--name',
+				specification.name,
+				'--title',
+				specification.title,
+				'--description',
+				specification.description,
+				'--lang',
+				specification.language,
+				'--color-scheme',
+				specification.colorScheme,
+				'--primary-color',
+				specification.primaryColor,
+				'--style',
+				specification.style,
+			],
+			specification.destination,
+			{ signal, timeout },
+		)
 	}
 
 	function initializeGit(destination) {
@@ -143,21 +155,20 @@ async function configurePackageManager(destination, packageManager, signal, time
 
 	let version
 	try {
-		({ stdout: version } = await executeFile(packageManager, ['--version'], {
+		;({ stdout: version } = await executeFile(packageManager, ['--version'], {
 			cwd: destination,
 			shell: process.platform === 'win32',
 			signal,
 			timeout,
 		}))
-	}
-	catch {
+	} catch {
 		throw new Error(`Could not run ${packageManager}. Install it or choose another package manager.`)
 	}
 	if (packageManager === 'pnpm') {
 		manifest.scripts = replaceManifestCommands(manifest.scripts)
 	}
 	const packageManagerEntry = ['packageManager', `${packageManager}@${version.trim()}`]
-	const entries = Object.entries(manifest).flatMap(entry => entry[0] === 'engines' ? [packageManagerEntry, entry] : [entry])
+	const entries = Object.entries(manifest).flatMap((entry) => (entry[0] === 'engines' ? [packageManagerEntry, entry] : [entry]))
 	if (!manifest.engines) {
 		entries.push(packageManagerEntry)
 	}
@@ -193,8 +204,7 @@ async function replaceProjectCommands(directory) {
 		const path = join(directory, entry.name)
 		if (entry.isDirectory()) {
 			await replaceProjectCommands(path)
-		}
-		else if (textExtensions.has(extname(entry.name)) || entry.name === 'Dockerfile') {
+		} else if (textExtensions.has(extname(entry.name)) || entry.name === 'Dockerfile') {
 			const source = await readFile(path, 'utf8')
 			const converted = entry.name === 'Dockerfile' ? replacePnpmDockerfile(source) : replacePnpmText(source)
 			if (converted !== source) {
@@ -236,7 +246,7 @@ async function prepareDestination(destination) {
 function run(command, args, cwd, { env, shell = false, signal, timeout } = {}) {
 	return new Promise((resolve, reject) => {
 		const child = spawn(command, args, { cwd, env, shell, signal, stdio: 'inherit', timeout })
-		child.once('error', error => reject(new Error(`Could not run ${command}: ${error.message}`)))
+		child.once('error', (error) => reject(new Error(`Could not run ${command}: ${error.message}`)))
 		child.once('close', (code, terminationSignal) => {
 			if (code === 0) {
 				resolve()

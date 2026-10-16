@@ -9,8 +9,9 @@ import { SHOWCASE_SOURCE, TEMPLATE_SOURCE } from '../src/domain/projectSpecifica
 const execute = promisify(execFile)
 const [templateRepository, templateReference] = parseSource(TEMPLATE_SOURCE)
 const [showcaseRepository, showcaseReference] = parseSource(SHOWCASE_SOURCE)
-const templateSha = await remoteSha(templateRepository, `refs/tags/${templateReference}^{}`)
-	.catch(() => remoteSha(templateRepository, `refs/tags/${templateReference}`))
+const templateSha = await remoteSha(templateRepository, `refs/tags/${templateReference}^{}`).catch(() =>
+	remoteSha(templateRepository, `refs/tags/${templateReference}`),
+)
 await assertCommit(showcaseRepository, showcaseReference)
 process.stdout.write(`Template ${templateSha.slice(0, 12)} and showcase ${showcaseReference.slice(0, 12)} pins are available.\n`)
 
@@ -35,12 +36,13 @@ async function assertCommit(repository, sha) {
 	const directory = await mkdtemp(resolve(tmpdir(), 'create-jst-source-'))
 	try {
 		await execute('git', ['init', '--quiet'], { cwd: directory, timeout: 15_000 })
-		await execute('git', ['fetch', '--quiet', '--depth=1', `https://github.com/${repository}.git`, sha], { cwd: directory, timeout: 30_000 })
-	}
-	catch (error) {
+		await execute('git', ['fetch', '--quiet', '--depth=1', `https://github.com/${repository}.git`, sha], {
+			cwd: directory,
+			timeout: 30_000,
+		})
+	} catch (error) {
 		throw new Error(`Remote source does not exist: ${repository}#${sha}.`, { cause: error })
-	}
-	finally {
+	} finally {
 		await rm(directory, { force: true, recursive: true })
 	}
 }

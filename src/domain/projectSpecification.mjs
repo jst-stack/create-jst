@@ -1,5 +1,20 @@
 export const COLOR_SCHEMES = ['light', 'dark', 'auto']
-export const PRIMARY_COLORS = ['dark', 'gray', 'red', 'pink', 'grape', 'violet', 'indigo', 'blue', 'cyan', 'teal', 'green', 'lime', 'yellow', 'orange']
+export const PRIMARY_COLORS = [
+	'dark',
+	'gray',
+	'red',
+	'pink',
+	'grape',
+	'violet',
+	'indigo',
+	'blue',
+	'cyan',
+	'teal',
+	'green',
+	'lime',
+	'yellow',
+	'orange',
+]
 export const PACKAGE_MANAGERS = ['npm', 'pnpm']
 export const STYLE_LANGUAGES = ['css', 'scss']
 export const EXAMPLES = ['clean', 'showcase']
@@ -54,9 +69,19 @@ export function validateProjectSpecification(specification) {
 }
 
 export function normalizePackageName(value) {
-	return value.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '') || 'jst-app'
+	return (
+		value
+			.toLowerCase()
+			.replace(/[^a-z0-9._-]+/g, '-')
+			.replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '') || 'jst-app'
+	)
 }
 
 export function toTitle(value) {
-	return value.replace(/^@[^/]+\//, '').split(/[-_.]+/).filter(Boolean).map(word => word[0].toUpperCase() + word.slice(1)).join(' ')
+	return value
+		.replace(/^@[^/]+\//, '')
+		.split(/[-_.]+/)
+		.filter(Boolean)
+		.map((word) => word[0].toUpperCase() + word.slice(1))
+		.join(' ')
 }

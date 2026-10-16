@@ -13,18 +13,20 @@ test('terminates project commands that exceed the gateway deadline', async () =>
 		await writeFile(resolve(destination, 'scripts/setup-template.mjs'), 'setTimeout(() => {}, 60_000)\n')
 		const gateway = createNodeProjectGateway({ nodeExecutable: process.execPath, timeout: 20 })
 
-		await assert.rejects(gateway.configureTemplate({
-			colorScheme: 'dark',
-			description: 'Test',
-			destination,
-			language: 'en',
-			name: 'test',
-			primaryColor: 'lime',
-			style: 'css',
-			title: 'Test',
-		}), /timed out after 20ms/u)
-	}
-	finally {
+		await assert.rejects(
+			gateway.configureTemplate({
+				colorScheme: 'dark',
+				description: 'Test',
+				destination,
+				language: 'en',
+				name: 'test',
+				primaryColor: 'lime',
+				style: 'css',
+				title: 'Test',
+			}),
+			/timed out after 20ms/u,
+		)
+	} finally {
 		await rm(destination, { force: true, recursive: true })
 	}
 })

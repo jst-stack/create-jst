@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createProjectMigrator } from '../src/application/projectMigrator.mjs'
-import { resolveMigrationPath } from '../src/domain/migrationCatalog.mjs'
+import { migrations, resolveMigrationPath } from '../src/domain/migrationCatalog.mjs'
 
 test('resolves a deterministic migration path', () => {
 	assert.deepEqual(
@@ -16,7 +16,7 @@ test('keeps dry runs read-only', async () => {
 	const migrator = createProjectMigrator({
 		gateway: {
 			assertSafeGitState: async () => undefined,
-			readMigrationFiles: async () => new Map([['eslint.config.js', "export default [jst.configs['strict']]\n"]]),
+			readMigrationFiles: async () => new Map([['eslint.config.js', 'export default [jst.configs.recommended]\n']]),
 			writeTransaction: async () => {
 				writes += 1
 			},
@@ -31,6 +31,13 @@ test('keeps dry runs read-only', async () => {
 	})
 	assert.equal(writes, 0)
 	assert.deepEqual(result.changedFiles, ['eslint.config.js', 'jst.config.ts'])
+})
+
+test('migration writes jst.config.ts importing from the package root', () => {
+	const files = new Map([['eslint.config.js', 'export default [jst.configs.recommended]\n']])
+	migrations[0].apply(files)
+	assert.match(files.get('jst.config.ts'), /@jst-stack\/eslint-plugin'\n/u)
+	assert.doesNotMatch(files.get('jst.config.ts'), /eslint-plugin\/policy/u)
 })
 
 test('terminates safely for adversarial migration versions', () => {

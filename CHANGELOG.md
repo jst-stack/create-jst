@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.30
+
+- Pin JST `v0.4.30` with transactional slice rollback and interruption coverage.
+
 ## 0.4.29
 
 - Pin JST `v0.4.29` with split quality and architecture enforcement and the refreshed showcase pin.

@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.33
+
+- Pin JST `v0.4.32` with the executable, workspace-confined MCP `0.1.4` and deterministic deferred dependency installation.
+
 ## 0.4.32
 
 - Publish through npm trusted publishing without duplicating its automatic provenance submission.

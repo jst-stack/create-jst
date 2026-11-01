@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.31
+
+- Pin JST `v0.4.31` with signed release archives and strengthened supply-chain metadata.
+
 ## 0.4.30
 
 - Pin JST `v0.4.30` with transactional slice rollback and interruption coverage.

@@ -63,7 +63,11 @@ test(
 				),
 			)
 			await execute('git', ['add', entryPath], { cwd: projectRoot })
-			await assert.rejects(execute('git', ['commit', '-m', 'test: invalid effect'], { cwd: projectRoot, timeout: 600_000 }), (error) =>
+			const invalidEffectCheck =
+				process.platform === 'win32'
+					? execute(packageManager, ['exec', 'eslint', entryPath], { cwd: projectRoot, shell: true, timeout: 120_000 })
+					: execute('git', ['commit', '-m', 'test: invalid effect'], { cwd: projectRoot, timeout: 600_000 })
+			await assert.rejects(invalidEffectCheck, (error) =>
 				/no-unguarded-browser-global-in-render-or-hook-init|effects-at-boundary/u.test(`${error.stdout}\n${error.stderr}`),
 			)
 		} finally {

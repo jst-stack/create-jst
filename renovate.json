@@ -1,0 +1,34 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^src\\/domain\\/projectSpecification\\.mjs$/"],
+      "matchStrings": [
+        "TEMPLATE_SOURCE = 'jst-stack\\/jst#(?<currentValue>v\\d+\\.\\d+\\.\\d+)'"
+      ],
+      "depNameTemplate": "jst-stack/jst",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDepNames": ["jst-stack/jst"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "bumpVersions": [
+        {
+          "name": "Bump create-jst package version",
+          "filePatterns": ["/(^|\\/)package(-lock)?\\.json$/"],
+          "matchStrings": [
+            "\\\"name\\\":\\s*\\\"create-jst\\\",\\s*\\\"version\\\":\\s*\\\"(?<version>\\d+\\.\\d+\\.\\d+)\\\""
+          ],
+          "bumpType": "patch"
+        }
+      ]
+    }
+  ]
+}

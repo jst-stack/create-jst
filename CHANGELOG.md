@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.32
+
+- Publish through npm trusted publishing without duplicating its automatic provenance submission.
+
 ## 0.4.31
 
 - Pin JST `v0.4.31` with signed release archives and strengthened supply-chain metadata.

@@ -23,10 +23,18 @@
       "platformAutomerge": true,
       "bumpVersions": [
         {
-          "name": "Bump create-jst package version",
+          "name": "Bump create-jst manifest versions",
           "filePatterns": ["/(^|\\/)package(-lock)?\\.json$/"],
           "matchStrings": [
-            "\\\"name\\\":\\s*\\\"create-jst\\\",\\s*\\\"version\\\":\\s*\\\"(?<version>\\d+\\.\\d+\\.\\d+)\\\""
+            "^\\{\\s*\\\"name\\\":\\s*\\\"create-jst\\\",\\s*\\\"version\\\":\\s*\\\"(?<version>\\d+\\.\\d+\\.\\d+)\\\""
+          ],
+          "bumpType": "patch"
+        },
+        {
+          "name": "Bump create-jst lockfile package version",
+          "filePatterns": ["/(^|\\/)package-lock\\.json$/"],
+          "matchStrings": [
+            "\\\"packages\\\":\\s*\\{\\s*\\\"\\\":\\s*\\{\\s*\\\"name\\\":\\s*\\\"create-jst\\\",\\s*\\\"version\\\":\\s*\\\"(?<version>\\d+\\.\\d+\\.\\d+)\\\""
           ],
           "bumpType": "patch"
         }

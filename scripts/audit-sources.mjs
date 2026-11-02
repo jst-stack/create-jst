@@ -1,12 +1,19 @@
 import { execFile } from 'node:child_process'
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
 import process from 'node:process'
+import { URL } from 'node:url'
 import { promisify } from 'node:util'
 import { SHOWCASE_SOURCE, TEMPLATE_SOURCE } from '../src/domain/projectSpecification.mjs'
 
 const execute = promisify(execFile)
+const packageManifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
+const packageLock = JSON.parse(await readFile(new URL('../package-lock.json', import.meta.url), 'utf8'))
+const versions = [packageManifest.version, packageLock.version, packageLock.packages?.['']?.version]
+if (versions.some((version) => version !== packageManifest.version)) {
+	throw new Error(`Package versions are out of sync: ${versions.join(', ')}.`)
+}
 const [templateRepository, templateReference] = parseSource(TEMPLATE_SOURCE)
 const [showcaseRepository, showcaseReference] = parseSource(SHOWCASE_SOURCE)
 const templateSha = await remoteSha(templateRepository, `refs/tags/${templateReference}^{}`).catch(() =>

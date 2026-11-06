@@ -18,6 +18,8 @@
     "audit:sources": "node scripts/audit-sources.mjs",
     "canary:migrate": "node scripts/migration-canary.mjs",
     "lint": "eslint . --max-warnings 0",
+    "audit:development": "node scripts/audit-development.mjs",
+    "audit:development:sync": "node scripts/sync-development-advisories.mjs --write",
     "benchmark": "node scripts/run-benchmarks.mjs",
     "benchmark:update": "node scripts/run-benchmarks.mjs --write-baseline",
     "test": "node --test test/degitTemplateGateway.test.mjs test/integration.test.mjs test/migration.test.mjs test/nodeMigrationGateway.test.mjs test/nodeProjectGateway.test.mjs test/options.test.mjs test/projectInitializer.test.mjs",

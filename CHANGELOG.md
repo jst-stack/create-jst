@@ -2,6 +2,10 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.39
+
+- Pin JST `v0.4.39`, whose README documents how to upgrade an existing project.
+
 ## 0.4.38
 
 - Enforce the Node.js contract of the generated project, warn about unsupported runtimes before scaffolding, and verify the pinned template compatibility manifest in the released canary.

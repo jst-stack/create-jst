@@ -2,6 +2,16 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.38
+
+- Enforce the Node.js contract of the generated project, warn about unsupported runtimes before scaffolding, and verify the pinned template compatibility manifest in the released canary.
+- Require a changelog entry before publishing and smoke-test the published CLI from the registry.
+- Pin JST `v0.4.38`.
+
+## 0.4.37
+
+- Pin JST `v0.4.36`.
+
 ## 0.4.36
 
 - Re-arm dependency auto-merge whenever a Dependabot branch moves and review development advisories through the ledger gate.

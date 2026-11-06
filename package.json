@@ -1,58 +1,58 @@
 {
-	"name": "create-jst",
-	"version": "0.4.38",
-	"description": "Create a web application from the JST template.",
-	"type": "module",
-	"packageManager": "npm@11.6.2",
-	"bin": {
-		"create-jst": "src/cli.mjs",
-		"jst": "src/jst.mjs"
-	},
-	"files": [
-		"src"
-	],
-	"engines": {
-		"node": ">=22.14.0"
-	},
-	"scripts": {
-		"audit:sources": "node scripts/audit-sources.mjs",
-		"canary:migrate": "node scripts/migration-canary.mjs",
-		"lint": "eslint . --max-warnings 0",
-		"audit:development": "node scripts/audit-development.mjs",
-		"audit:development:sync": "node scripts/sync-development-advisories.mjs --write",
-		"benchmark": "node scripts/run-benchmarks.mjs",
-		"benchmark:update": "node scripts/run-benchmarks.mjs --write-baseline",
-		"test": "node --test test/degitTemplateGateway.test.mjs test/integration.test.mjs test/migration.test.mjs test/nodeMigrationGateway.test.mjs test/nodeProjectGateway.test.mjs test/options.test.mjs test/projectInitializer.test.mjs test/compatibilityCanary.test.mjs test/nodeContract.test.mjs test/nodeRuntime.test.mjs test/property.test.mjs",
-		"test:generated": "node --test test/generatedProject.test.mjs",
-		"check": "npm run lint && npm test && npm pack --dry-run",
-		"prepublishOnly": "npm run check"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/jst-stack/create-jst.git"
-	},
-	"bugs": {
-		"url": "https://github.com/jst-stack/create-jst/issues"
-	},
-	"homepage": "https://github.com/jst-stack/jst#readme",
-	"keywords": [
-		"architecture",
-		"create-app",
-		"react",
-		"ssr",
-		"starter",
-		"typescript"
-	],
-	"license": "MIT",
-	"dependencies": {
-		"@clack/prompts": "^1.8.1",
-		"@reatom/core": "^1001.3.0",
-		"@reatom/react": "^1001.0.1",
-		"degit": "^3.10.0"
-	},
-	"devDependencies": {
-		"@eslint/js": "^10.0.1",
-		"@jst-stack/eslint-plugin-quality": "^0.2.1",
-		"eslint": "^10.10.0"
-	}
+  "name": "create-jst",
+  "version": "0.4.38",
+  "description": "Create a web application from the JST template.",
+  "type": "module",
+  "packageManager": "npm@11.6.2",
+  "bin": {
+    "create-jst": "src/cli.mjs",
+    "jst": "src/jst.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "scripts": {
+    "audit:sources": "node scripts/audit-sources.mjs",
+    "canary:migrate": "node scripts/migration-canary.mjs",
+    "lint": "eslint . --max-warnings 0",
+    "audit:development": "node scripts/audit-development.mjs",
+    "audit:development:sync": "node scripts/sync-development-advisories.mjs --write",
+    "benchmark": "node scripts/run-benchmarks.mjs",
+    "benchmark:update": "node scripts/run-benchmarks.mjs --write-baseline",
+    "test": "node --test test/degitTemplateGateway.test.mjs test/integration.test.mjs test/migration.test.mjs test/nodeMigrationGateway.test.mjs test/nodeProjectGateway.test.mjs test/options.test.mjs test/projectInitializer.test.mjs test/compatibilityCanary.test.mjs test/nodeContract.test.mjs test/nodeRuntime.test.mjs test/property.test.mjs",
+    "test:generated": "node --test test/generatedProject.test.mjs",
+    "check": "npm run lint && npm test && npm pack --dry-run",
+    "prepublishOnly": "npm run check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jst-stack/create-jst.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jst-stack/create-jst/issues"
+  },
+  "homepage": "https://github.com/jst-stack/jst#readme",
+  "keywords": [
+    "architecture",
+    "create-app",
+    "react",
+    "ssr",
+    "starter",
+    "typescript"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@clack/prompts": "^1.8.1",
+    "@reatom/core": "^1001.3.0",
+    "@reatom/react": "^1001.0.1",
+    "degit": "^3.10.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@jst-stack/eslint-plugin-quality": "^0.2.1",
+    "eslint": "^10.10.0"
+  }
 }

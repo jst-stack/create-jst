@@ -2,6 +2,21 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.36
+
+- Re-arm dependency auto-merge whenever a Dependabot branch moves and review development advisories through the ledger gate.
+- Pin JST `v0.4.35`.
+
+## 0.4.35
+
+- Keep Renovate-managed package versions in sync with the lockfile.
+- Pin JST `v0.4.34`.
+
+## 0.4.34
+
+- Automate release validation and template promotion, and stabilize the Windows canary.
+- Pin JST `v0.4.33`.
+
 ## 0.4.33
 
 - Pin JST `v0.4.32` with the executable, workspace-confined MCP `0.1.4` and deterministic deferred dependency installation.

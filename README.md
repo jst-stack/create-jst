@@ -21,6 +21,18 @@ npm create jst@latest my-app -- --example showcase
 
 Use `--help` to view deterministic flags for automation. The initializer never overwrites a non-empty directory and released versions resolve immutable template/showcase revisions.
 
+## Node.js
+
+create-jst runs on Node.js `>=22.14.0`; CI verifies 22.14.0 and 24.15.0 on Linux, macOS, and Windows.
+
+Generated projects require Node.js `>=24.15.0 <25`, the range the JST template supports. When dependencies would be installed, create-jst verifies that range before it changes anything and stops with an actionable message instead of producing a project the running Node.js cannot build:
+
+```
+✕ The generated JST project requires Node.js >=24.15.0 <25; this process runs Node.js 22.14.0. Install a Node.js version in that range and run create-jst again.
+```
+
+`--no-install` keeps scaffolding available on any Node.js the generator runs on; the generated project still requires `>=24.15.0 <25`. `--template <owner/repo[#ref]>` skips the pinned-source check, and the cloned template's own `engines.node` is validated before configuration.
+
 ## Migrations
 
 Run migrations from a clean Git working tree:

@@ -5,6 +5,7 @@ import { realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import packageMetadata from '../package.json' with { type: 'json' }
 import { createProjectApplication } from './composition/createProjectApplication.mjs'
+import { assertNodeSupported, pinnedTemplateNodeRange } from './domain/nodeContract.mjs'
 import { parseCommandLine, printHelp, resolveProjectRequest } from './ui/command.mjs'
 import { createReporter } from './ui/reporter.mjs'
 
@@ -24,6 +25,8 @@ export async function run(argv, environment = process, injectedApplication) {
 			return environment.stdout.write(`${packageMetadata.version}\n`)
 		}
 
+		assertTemplateRuntime(command, environment)
+
 		const request = await resolveProjectRequest(command, environment)
 		if (request.dryRun) {
 			return reporter.plan(request.specification, request)
@@ -42,6 +45,18 @@ export async function run(argv, environment = process, injectedApplication) {
 	} finally {
 		signals.dispose()
 	}
+}
+
+function assertTemplateRuntime(command, environment) {
+	if (command.values['dry-run'] || command.values['no-install'] || command.values['skip-install']) {
+		return
+	}
+	const range = pinnedTemplateNodeRange({ example: command.values.example, template: command.values.template })
+	if (!range) {
+		return
+	}
+	const current = environment.versions?.node ?? process.versions.node
+	assertNodeSupported({ current, range, subject: 'The generated JST project' })
 }
 
 function registerCancellation(environment) {

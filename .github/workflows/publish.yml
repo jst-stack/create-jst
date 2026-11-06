@@ -69,6 +69,13 @@ jobs:
             [ "$attempt" -eq 12 ] && exit 1
             sleep 15
           done
+      - name: Smoke-test the published CLI from the registry
+        run: |
+          workspace="$(mktemp -d)"
+          cd "$workspace"
+          npm exec --yes --package "${{ steps.package.outputs.name }}@${{ steps.package.outputs.version }}" -- \
+            create-jst smoke-app --yes --no-git --no-install
+          node -e "const manifest = require('./smoke-app/package.json'); if (!manifest.engines?.node) process.exit(1)"
       - name: Create GitHub release
         env:
           RELEASE_TAG: ${{ steps.package.outputs.tag }}

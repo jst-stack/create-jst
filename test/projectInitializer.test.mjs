@@ -38,11 +38,11 @@ test('orchestrates replaceable gateways and publishes progress', async () => {
 	assert.deepEqual(calls, [
 		['assert', '/projects/example'],
 		['clone', 'owner/template', '/projects/example.tmp'],
+		['runtime', '/projects/example.tmp'],
 		['validate', '/projects/example.tmp'],
 		['configure', 'example'],
 		['manager', 'pnpm'],
 		['git'],
-		['runtime', '/projects/example.tmp'],
 		['commit', '/projects/example.tmp', '/projects/example'],
 		['install', 'pnpm', { gitHooks: true }],
 	])

@@ -9,6 +9,9 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 			try {
 				onProgress({ type: 'template.download.started', specification })
 				await templateGateway.clone(specification.template, temporaryDestination)
+				if (specification.install) {
+					await projectGateway.assertRuntimeSupported(temporaryDestination)
+				}
 				if (specification.example === 'clean') {
 					await projectGateway.validateTemplate(temporarySpecification)
 				}
@@ -29,9 +32,6 @@ export function createProjectInitializer({ onProgress = () => undefined, project
 					await projectGateway.initializeGit(temporaryDestination)
 				} else {
 					await projectGateway.removeGitMetadata(temporaryDestination)
-				}
-				if (specification.install) {
-					await projectGateway.assertRuntimeSupported(temporaryDestination)
 				}
 				await projectGateway.commitDestination(temporaryDestination, specification.destination)
 				rollbackDestination = specification.destination

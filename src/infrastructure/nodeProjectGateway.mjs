@@ -4,6 +4,7 @@ import { lstat, readFile, readdir, rename, rm, writeFile } from 'node:fs/promise
 import { basename, dirname, extname, join } from 'node:path'
 import process from 'node:process'
 import { promisify } from 'node:util'
+import { assertNodeSupported, parseNodeRange } from '../domain/nodeContract.mjs'
 
 const executeFile = promisify(execFile)
 const installCommands = {
@@ -124,26 +125,14 @@ function removeGitMetadata(destination) {
 async function assertRuntimeSupported(destination) {
 	const manifest = JSON.parse(await readFile(join(destination, 'package.json'), 'utf8'))
 	const required = manifest.engines?.node
-	const match = /^>=(\d+)\.(\d+)\.(\d+) <(\d+)$/u.exec(required ?? '')
-	if (!match) {
+	if (required === undefined) {
 		return
 	}
-	const current = process.versions.node.split('.').map(Number)
-	const minimum = match.slice(1, 4).map(Number)
-	const maximumMajor = Number(match[4])
-	if (current[0] < maximumMajor && compareVersions(current, minimum) >= 0) {
-		return
+	if (!parseNodeRange(required)) {
+		const message = 'The generated project declares an engines.node range create-jst cannot evaluate: ' + required + '.'
+		throw new Error(message)
 	}
-	throw new Error(`This template requires Node.js ${required}; detected ${process.versions.node}. Upgrade Node and run create-jst again.`)
-}
-
-function compareVersions(left, right) {
-	for (let index = 0; index < right.length; index += 1) {
-		if (left[index] !== right[index]) {
-			return left[index] - right[index]
-		}
-	}
-	return 0
+	assertNodeSupported({ current: process.versions.node, range: required, subject: 'The generated project' })
 }
 
 async function configurePackageManager(destination, packageManager, signal, timeout) {

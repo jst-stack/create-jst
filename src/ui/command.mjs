@@ -90,6 +90,10 @@ export function printHelp(output) {
 Usage:
   npm create jst@latest [directory] [options]
 
+Node.js:
+  create-jst runs on Node.js >=22.14.0. Generated projects require Node.js >=24.15.0 <25.
+  create-jst stops before writing anything when it would install dependencies on an unsupported version.
+
 The interactive wizard only asks about decisions that affect the generated project.
 Application title and description are derived from the directory; pass flags only when automation needs overrides.
 

@@ -39,6 +39,19 @@ export function parseCommandLine(args) {
 	})
 }
 
+export function parseMcpSetupCommand(args) {
+	const parsed = parseArgs({
+		allowPositionals: true,
+		args,
+		options: { 'dry-run': { type: 'boolean' } },
+		strict: true,
+	})
+	if (parsed.positionals.length) {
+		throw new Error('Usage: create-jst mcp setup [--dry-run]')
+	}
+	return { dryRun: parsed.values['dry-run'] ?? false }
+}
+
 export async function resolveProjectRequest(command, environment) {
 	const { positionals, values } = command
 	validateCommand(positionals, values)
@@ -101,6 +114,7 @@ Examples:
   npm create jst@latest my-app
   npm create jst@latest my-app -- --yes --style scss
   npm create jst@latest jst-showcase -- --example showcase
+  create-jst mcp setup --dry-run  # preview global JST MCP and Pi setup
 
 Options:
   --package-manager <manager>    auto, npm, or pnpm
@@ -119,6 +133,10 @@ Options:
   --template <owner/repo[#ref]>  use a compatible template source
   -v, --version                  show the CLI version
   -h, --help                     show this help
+
+MCP setup (from a generated JST project):
+  create-jst mcp setup           install @jst-stack/mcp globally and register it in Pi
+  create-jst mcp setup --dry-run preview the project stack and setup steps
 `)
 }
 

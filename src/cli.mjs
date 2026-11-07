@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import packageMetadata from '../package.json' with { type: 'json' }
 import { createProjectApplication } from './composition/createProjectApplication.mjs'
 import { assertNodeSupported, pinnedTemplateNodeRange } from './domain/nodeContract.mjs'
-import { parseCommandLine, printHelp, resolveProjectRequest } from './ui/command.mjs'
+import { parseCommandLine, parseMcpSetupCommand, printHelp, resolveProjectRequest } from './ui/command.mjs'
 import { createReporter } from './ui/reporter.mjs'
 
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -17,6 +17,9 @@ export async function run(argv, environment = process, injectedApplication) {
 	const reporter = createReporter(environment.stdout, environment.env)
 	const signals = registerCancellation(environment)
 	try {
+		if (argv[0] === 'mcp') {
+			return await runMcpSetup(argv.slice(1), environment, injectedApplication)
+		}
 		const command = parseCommandLine(argv)
 		if (command.values.help) {
 			return printHelp(environment.stdout)
@@ -45,6 +48,16 @@ export async function run(argv, environment = process, injectedApplication) {
 	} finally {
 		signals.dispose()
 	}
+}
+
+async function runMcpSetup(argv, environment, injectedApplication) {
+	if (argv[0] !== 'setup') {
+		throw new Error('Usage: create-jst mcp setup [--dry-run]')
+	}
+	const setup = parseMcpSetupCommand(argv.slice(1))
+	const application = injectedApplication ?? createProjectApplication()
+	const result = await application.mcpSetup.execute({ projectRoot: environment.cwd(), ...setup })
+	environment.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
 }
 
 function assertTemplateRuntime(command, environment) {

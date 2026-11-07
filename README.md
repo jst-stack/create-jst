@@ -21,6 +21,15 @@ npm create jst@latest my-app -- --example showcase
 
 Use `--help` to view deterministic flags for automation. The initializer never overwrites a non-empty directory and released versions resolve immutable template/showcase revisions.
 
+From a generated JST project, install the global MCP server and register it with Pi:
+
+```bash
+npx --yes create-jst@latest mcp setup --dry-run
+npx --yes create-jst@latest mcp setup
+```
+
+The setup command only installs after validating the current directory as a JST project. MCP reads the project's declared dependencies on each task start, so it can guide agents to preserve the selected stack rather than restoring demo libraries.
+
 ## Node.js
 
 create-jst runs on Node.js `>=22.14.0`; CI verifies 22.14.0 and 24.15.0 on Linux, macOS, and Windows.

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { detectPackageManager, parseCommandLine, resolveProjectRequest } from '../src/ui/command.mjs'
+import { detectPackageManager, parseCommandLine, parseMcpSetupCommand, resolveProjectRequest } from '../src/ui/command.mjs'
 import { normalizePackageName, SHOWCASE_SOURCE, TEMPLATE_SOURCE, toTitle } from '../src/domain/projectSpecification.mjs'
 
 test('parses a non-interactive project command', () => {
@@ -9,6 +9,12 @@ test('parses a non-interactive project command', () => {
 	assert.equal(result.values['package-manager'], 'pnpm')
 	assert.equal(result.values['no-install'], true)
 	assert.equal(result.values.style, 'scss')
+})
+
+test('parses the opt-in global MCP setup command', () => {
+	assert.deepEqual(parseMcpSetupCommand(['--dry-run']), { dryRun: true })
+	assert.deepEqual(parseMcpSetupCommand([]), { dryRun: false })
+	assert.throws(() => parseMcpSetupCommand(['unexpected']), /Usage: create-jst mcp setup/u)
 })
 
 test('normalizes a directory name to a package name', () => {

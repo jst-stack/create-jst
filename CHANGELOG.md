@@ -2,6 +2,11 @@
 
 Notable changes to `create-jst` are documented here.
 
+## 0.4.40
+
+- Add `create-jst mcp setup` (and `--dry-run`) so a generated project registers `@jst-stack/mcp` with Pi instead of hand-editing `mcp.json` and `settings.json`.
+- Pin JST `v0.4.40`.
+
 ## 0.4.39
 
 - Pin JST `v0.4.39`, whose README documents how to upgrade an existing project.

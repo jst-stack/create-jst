@@ -26,8 +26,11 @@ export function createNodeMcpGateway({ timeout = 600_000 } = {}) {
 			access(join(root, 'jst.config.ts')),
 			access(join(root, 'skills/frontend-architecture/SKILL.md')),
 		])
-		const packages = Object.entries({ ...(manifest.dependencies ?? {}), ...(manifest.devDependencies ?? {}) })
-			.filter((entry) => typeof entry[1] === 'string')
+		const packages = [
+			...Object.entries(manifest.dependencies ?? {}),
+			...Object.entries(manifest.devDependencies ?? {}),
+		]
+			.filter(([name, version]) => typeof name === 'string' && typeof version === 'string')
 			.map(([name, version]) => `${name}@${version}`)
 			.sort()
 		return {

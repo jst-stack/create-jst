@@ -24,7 +24,7 @@ jobs:
       pull-requests: write
     steps:
       - id: metadata
-        uses: dependabot/fetch-metadata@08eff52bf64351f401fb50d4972fa95b9f2c2d1b # v2.4.0
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
       # Runs again on every synchronize: a Dependabot rebase or a manual "Update branch" push drops
       # the auto-merge request, which used to park the pull request until someone squashed it by hand.
       # Re-arming is idempotent, so repeated runs on the same pull request are harmless.
